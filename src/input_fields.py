@@ -19,7 +19,7 @@ def input_fields():
 
     # Slider Input
     budget = st.slider("Select your movie budget:", min_value=0, max_value=10000000, value=50000, step=1000)
-    st.write("Your income is:", budget)
+    st.write("Your movie budget is:", budget)
     
     if st.button("Predict", key = "go_to_dashboard"):
         print("Predict button clicked")
