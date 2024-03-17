@@ -1,6 +1,7 @@
 import streamlit as st
 from src import dashboard, input_fields
 
+# if we want the navigation to be by side bar
 # def main():
 #     st.sidebar.title("Navigation")
 #     page_options = ["Dashboard", "Input Fields"]
@@ -14,6 +15,8 @@ from src import dashboard, input_fields
 # if __name__ == "__main__":
 #     main()
 
+
+# if we want navigation via buttons inside the pages
 def main():
 
     # Initialize session state if not already done
