@@ -3,3 +3,15 @@
 
 # Ignore _pycache files
 src/__pycache__/
+dags/__pycache__/
+
+# Ignore environment-specific files
+.env
+*.env
+
+# Ignore Docker-related files
+.dockerignore
+
+# Ignore Airflow log files
+logs/
+*.log
