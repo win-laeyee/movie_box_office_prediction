@@ -1,0 +1,1 @@
+This is adapted from the source code: https://github.com/Stink-Po/boxoffice_api/tree/master
