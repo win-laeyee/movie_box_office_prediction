@@ -4,6 +4,7 @@
 # Ignore _pycache files
 src/__pycache__/
 dags/__pycache__/
+src/utils/__pycache__
 __pycache__/
 
 # Ignore environment-specific files
@@ -16,6 +17,11 @@ __pycache__/
 # Ignore Airflow log files
 logs/
 *.log
+
+
+# Ignore experiment files
+/notebook_experiments
+
 
 #ignore googlecloud config
 googlecloud/is3107-418809-62c002a9f1f7.json
