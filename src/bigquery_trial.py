@@ -12,6 +12,8 @@ keyfile_path = "../secrets/bigquery_credentials.json"
 
 ######## Bigquery Access method samples
 
+## need {project_id}.{dataset_id}.{table_id} to perform queries
+
 def read_data():
     # start a bigquery client using ur service account credentials
     client = bigquery.Client.from_service_account_json(keyfile_path)
@@ -49,7 +51,14 @@ def create_model():
     output = query_job.result()
     print(output)
 
+# try creating a model directly using movie_details data
 create_model()
+
+"""
+Apparently Bigquery free service does not include DML queries, 
+so cannot insert, delete and update table
+"""
+
 
 """
 CREATE MODEL `firm-catalyst-417613.IS3107.test_model_1`
@@ -67,5 +76,4 @@ SELECT
   cast(producer_id as string) as producer_id
 from
   IS3107.movie_details
-
 """
