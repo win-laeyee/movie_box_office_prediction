@@ -4,6 +4,7 @@
 # Ignore _pycache files
 src/__pycache__/
 dags/__pycache__/
+src/utils/__pycache__
 
 # Ignore environment-specific files
 .env
@@ -15,3 +16,7 @@ dags/__pycache__/
 # Ignore Airflow log files
 logs/
 *.log
+
+
+# Ignore experiment files
+/notebook_experiments
