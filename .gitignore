@@ -27,3 +27,6 @@ googlecloud/is3107-418809-62c002a9f1f7.json
 
 #others 
 .DS_Store
+
+#ignore raw_movie_details related ndjson 
+historical_data/raw_historical_data/tmdb/*.ndjson
