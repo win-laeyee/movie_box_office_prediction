@@ -72,8 +72,15 @@ def get_boxofficemojo_data_gcs():
 
 #Main function
 def get_clean_weekly_domestic_performance(data_path:str):
-    """Main Function: Get cleaned as per ERD"""
+    """
+    Cleans and processes the weekly domestic performance data for movies from raw data from google cloud storage.
 
+    Args:
+        data_path (str): The path to the folder where the cleaned data will be saved.
+
+    Returns:
+        str: The path to the cleaned data file.
+    """
     df = get_tmdb_date_id_title_gcs()
     intermmediate_df = get_boxofficemojo_data_gcs()
 
@@ -103,5 +110,5 @@ def get_clean_weekly_domestic_performance(data_path:str):
     return str(os.path.join(folder_path, f"cleaned_weekly_domestic_performance.csv"))
 
 if __name__ == "__main__":
-    get_clean_weekly_domestic_performance()
-    
+    #get_clean_weekly_domestic_performance()
+    pass

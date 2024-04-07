@@ -145,6 +145,22 @@ def create_weekly_domestic_performance_table(project_id="is3107-418809", dataset
     create_table_if_not_exists(project_id, dataset_id, table_id, schema)
 
 
+def create_all_tables(project_id="is3107-418809", dataset_id="movie_dataset"):
+    """
+    Creates all the required tables in BigQuery for the movie box office prediction project.
+
+    Args:
+        project_id (str, optional): The ID of the Google Cloud project. Defaults to "is3107-418809".
+        dataset_id (str, optional): The ID of the BigQuery dataset. Defaults to "movie_dataset".
+    """
+    create_dataset_if_not_exists(project_id, dataset_id)
+    create_movie_table(project_id, dataset_id)
+    create_collection_table(project_id, dataset_id)
+    create_people_table(project_id, dataset_id)
+    create_video_stats_table(project_id, dataset_id)
+    create_weekly_domestic_performance_table(project_id, dataset_id)
+
+
 def delete_all_tables(project_id="is3107-418809", dataset_id="movie_dataset"):
     """
     Deletes all tables in a dataset in BigQuery. Before creating all tables.
@@ -176,8 +192,4 @@ if __name__ == "__main__":
     dataset_id = "movie_dataset"
     delete_all_tables(project_id, dataset_id)
     create_dataset_if_not_exists(project_id, dataset_id)
-    create_movie_table(project_id, dataset_id)
-    create_collection_table(project_id, dataset_id)
-    create_people_table(project_id, dataset_id)
-    create_video_stats_table(project_id, dataset_id)
-    create_weekly_domestic_performance_table(project_id, dataset_id)
+    create_all_tables(project_id, dataset_id)

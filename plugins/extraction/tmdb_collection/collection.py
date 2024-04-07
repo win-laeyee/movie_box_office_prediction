@@ -148,7 +148,7 @@ def clean_raw_collections_details(save_file_path):
         save_file_path (str): The directory path where the cleaned CSV file will be saved.
 
     Returns:
-        None
+        filepath (str)
     """
 
     collection_results = get_raw_initial_collection_tmdb_details_gcs()
@@ -165,5 +165,7 @@ def clean_raw_collections_details(save_file_path):
     cleaned_df = pd.DataFrame(cleaned_results, 
                             columns=["collection_id", "name", "number_movies_before_2020", "avg_popularity_before_2020"])
     folder_path = save_file_path
-    cleaned_df.to_csv(os.path.join(folder_path, "cleaned_collection_info.csv"))
-    print(os.path.join(folder_path, "cleaned_collection_info.csv"))
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+    cleaned_df.to_csv(os.path.join(folder_path, "cleaned_collection_info.csv"), index=False)
+    return os.path.join(folder_path, "cleaned_collection_info.csv")

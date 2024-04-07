@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 sys.path.append(str(Path.cwd()))
-from .validator import Validator
+from extraction.boxoffice_api.validator import Validator
 from bs4 import BeautifulSoup
 import requests
 import pandas as pd
