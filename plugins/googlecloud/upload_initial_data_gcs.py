@@ -8,6 +8,10 @@ from google.cloud.storage import Client, transfer_manager
 
 def upload_blob(bucket_name, source_file_name, destination_blob_name):
     """Uploads a file to the Google Cloud Storage bucket."""
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    json_path = os.path.join(script_dir, "is3107-418809-62c002a9f1f7.json")
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
+    
     # Initialize a client
     storage_client = storage.Client()
 
@@ -32,6 +36,9 @@ def upload_many_blobs_with_transfer_manager(bucket_name, filenames, source_direc
     file (and other aspects of individual blob metadata), use
     transfer_manager.upload_many() instead.
     """
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    json_path = os.path.join(script_dir, "is3107-418809-62c002a9f1f7.json")
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
 
     storage_client = Client()
     bucket = storage_client.bucket(bucket_name)

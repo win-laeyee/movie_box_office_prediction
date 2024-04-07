@@ -7,7 +7,10 @@ import os
 
 def list_blobs(bucket_name, prefix=None):
     """Lists files in a Google Cloud Storage bucket"""
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "googlecloud/is3107-418809-62c002a9f1f7.json"
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    json_path = os.path.join(script_dir, "is3107-418809-62c002a9f1f7.json")
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
+
     storage_client = storage.Client()
     bucket = storage_client.bucket(bucket_name)
     blobs = bucket.list_blobs(prefix=prefix)
@@ -20,7 +23,9 @@ def list_blobs(bucket_name, prefix=None):
 
 
 def read_blob(bucket_name, blob_name):
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "googlecloud/is3107-418809-62c002a9f1f7.json"
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    json_path = os.path.join(script_dir, "is3107-418809-62c002a9f1f7.json")
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
     
     """Reads the contents of a blob from the Google Cloud Storage bucket."""
     # Initialize a client

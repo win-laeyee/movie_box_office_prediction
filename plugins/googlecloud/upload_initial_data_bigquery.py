@@ -4,7 +4,9 @@ import os
 #may want create a dag to upload clean initial data to bigquery
 def upload_csv_to_table(project_id, dataset_id, table_id, csv_file_path, mode):
     """mode can be (append, truncate or empty)"""
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "googlecloud/is3107-418809-62c002a9f1f7.json"
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    json_path = os.path.join(script_dir, "is3107-418809-62c002a9f1f7.json")
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
 
     # Initialize BigQuery client
     client = bigquery.Client(project=project_id)
@@ -33,7 +35,9 @@ def upload_csv_to_table(project_id, dataset_id, table_id, csv_file_path, mode):
     print(f"CSV file {csv_file_path} uploaded to table {table_id} in dataset {dataset_id} successfully.")
 
 def delete_all_data_from_table(project_id, dataset_id, table_id):
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "googlecloud/is3107-418809-62c002a9f1f7.json"
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    json_path = os.path.join(script_dir, "is3107-418809-62c002a9f1f7.json")
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
 
     # Initialize BigQuery client
     client = bigquery.Client(project=project_id)

@@ -2,7 +2,9 @@ from google.cloud import bigquery
 import os
 
 def create_dataset_if_not_exists(project_id, dataset_id):
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "googlecloud/is3107-418809-62c002a9f1f7.json"
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    json_path = os.path.join(script_dir, "is3107-418809-62c002a9f1f7.json")
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
 
     # Initialize BigQuery client
     client = bigquery.Client(project=project_id)
@@ -21,7 +23,10 @@ def create_dataset_if_not_exists(project_id, dataset_id):
         print(f"Dataset {dataset_id} created successfully.")
 
 def create_table_if_not_exists(project_id, dataset_id, table_id, schema):
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "googlecloud/is3107-418809-62c002a9f1f7.json"
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    json_path = os.path.join(script_dir, "is3107-418809-62c002a9f1f7.json")
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
+    
     # Initialize BigQuery client
     client = bigquery.Client(project=project_id)
 
