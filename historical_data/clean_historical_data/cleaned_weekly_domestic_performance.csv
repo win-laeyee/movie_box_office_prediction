@@ -1,4 +1,4 @@
-week_end_date,id,rank,domestic_gross,domestic_theaters_count
+week_end_date,movie_id,rank,domestic_gross,domestic_theaters_count
 2021-01-07,464052,1,6591907,2151
 2021-01-07,529203,2,2731370,1751
 2021-01-07,581032,3,2143800,1928
