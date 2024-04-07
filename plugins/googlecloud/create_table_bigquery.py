@@ -89,7 +89,8 @@ def create_movie_table(project_id="is3107-418809", dataset_id="movie_dataset"):
         bigquery.SchemaField("producer_id", "INT64"),
         bigquery.SchemaField("tmdb_popularity", "FLOAT64"),
         bigquery.SchemaField("tmdb_vote_average", "FLOAT64"),
-        bigquery.SchemaField("tmdb_vote_count", "FLOAT64")
+        bigquery.SchemaField("tmdb_vote_count", "FLOAT64"),
+        bigquery.SchemaField('insertion_datetime', "DATETIME")
     ]
     create_table_if_not_exists(project_id, dataset_id, table_id, schema)
 
@@ -100,7 +101,8 @@ def create_collection_table(project_id="is3107-418809", dataset_id="movie_datase
         bigquery.SchemaField("collection_id", "INT64", mode="REQUIRED"), 
         bigquery.SchemaField("name", "STRING"),
         bigquery.SchemaField("number_movies_before_2020", "INT64"),
-        bigquery.SchemaField("avg_tmdb_popularity_before_2020", "FLOAT64")
+        bigquery.SchemaField("avg_tmdb_popularity_before_2020", "FLOAT64"),
+        bigquery.SchemaField('insertion_datetime', "DATETIME")
     ]
     create_table_if_not_exists(project_id, dataset_id, table_id, schema)
 
@@ -114,7 +116,8 @@ def create_people_table(project_id="is3107-418809", dataset_id="movie_dataset"):
         bigquery.SchemaField("known_for", "STRING"),
         bigquery.SchemaField("tmdb_popularity", "FLOAT64"),
         bigquery.SchemaField("total_number_cast_credits", "INT64"),
-        bigquery.SchemaField("total_number_crew_credits", "INT64")
+        bigquery.SchemaField("total_number_crew_credits", "INT64"),
+        bigquery.SchemaField('insertion_datetime', "DATETIME")
     ]
     create_table_if_not_exists(project_id, dataset_id, table_id, schema)
 
@@ -128,7 +131,8 @@ def create_video_stats_table(project_id="is3107-418809", dataset_id="movie_datas
         bigquery.SchemaField("view_count", "INT64"),
         bigquery.SchemaField("like_count", "INT64"),
         bigquery.SchemaField("favourite_count", "INT64"),
-        bigquery.SchemaField("comment_count", "INT64")
+        bigquery.SchemaField("comment_count", "INT64"),
+        bigquery.SchemaField('insertion_datetime', "DATETIME")
     ]
     create_table_if_not_exists(project_id, dataset_id, table_id, schema)
 
@@ -140,7 +144,8 @@ def create_weekly_domestic_performance_table(project_id="is3107-418809", dataset
         bigquery.SchemaField("movie_id", "INT64", mode="REQUIRED"),      # Make movie_id mandatory
         bigquery.SchemaField("rank", "INT64"),
         bigquery.SchemaField("domestic_gross", "INT64"),
-        bigquery.SchemaField("domestic_theaters_count", "INT64")
+        bigquery.SchemaField("domestic_theaters_count", "INT64"),
+        bigquery.SchemaField('insertion_datetime', "DATETIME")
     ]
     create_table_if_not_exists(project_id, dataset_id, table_id, schema)
 

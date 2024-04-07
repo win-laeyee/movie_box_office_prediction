@@ -1,5 +1,7 @@
 from google.cloud import bigquery
 import os
+import pandas as pd
+from datetime import datetime
 
 #may want create a dag to upload clean initial data to bigquery
 def upload_csv_to_table(project_id, dataset_id, table_id, csv_file_path, mode):
@@ -24,6 +26,11 @@ def upload_csv_to_table(project_id, dataset_id, table_id, csv_file_path, mode):
         job_config.write_disposition = bigquery.WriteDisposition.WRITE_TRUNCATE
     elif mode == "empty":
         job_config.write_disposition = bigquery.WriteDisposition.WRITE_EMPTY  # Write only when tables empty - ensure no any overwrite
+
+    
+    df = pd.read_csv(csv_file_path)
+    df['insertion_datetime'] = datetime.now() #create new column if not exist and save to same file
+    df.to_csv(csv_file_path, index=False)
 
     # Load data from CSV file into the table
     with open(csv_file_path, "rb") as source_file:
