@@ -71,7 +71,7 @@ def get_boxofficemojo_data_gcs():
     return intermmediate_df
 
 #Main function
-def get_clean_weekly_domestic_performance(data_path:str):
+def get_clean_weekly_domestic_performance(data_path:str, return_df=False):
     """
     Cleans and processes the weekly domestic performance data for movies from raw data from google cloud storage.
 
@@ -79,7 +79,7 @@ def get_clean_weekly_domestic_performance(data_path:str):
         data_path (str): The path to the folder where the cleaned data will be saved.
 
     Returns:
-        str: The path to the cleaned data file.
+        filepath (str) or dataframe (pd.Dataframe)
     """
     df = get_tmdb_date_id_title_gcs()
     intermmediate_df = get_boxofficemojo_data_gcs()
@@ -94,20 +94,19 @@ def get_clean_weekly_domestic_performance(data_path:str):
     final_df['id'] = final_df['id'].astype(int, errors='ignore')
 
     interested_final = ['week_end_date', 'id', 'rank', 'gross', 'theaters']
-
-    folder_path = data_path
-    if not os.path.exists(folder_path):
-        os.makedirs(folder_path)
-
-    #save one checking file and another final clean file -- should push clean to big query
-    #final_df.loc[final_df['days_diff']<=50].to_csv('check.csv', index=False)
-
     #choose 50 as cut off (increasing days diff increases uncertainty of correct matches)
-    (final_df.loc[final_df['days_diff']<=50,interested_final]
-    .rename(columns={'id': 'movie_id', 'gross':'domestic_gross', 'theaters': 'domestic_theaters_count'})
-    .to_csv(os.path.join(folder_path, f"cleaned_weekly_domestic_performance.csv"), index=False))
+    interested_final_df = (final_df.loc[final_df['days_diff']<=50,interested_final]
+                           .rename(columns={'id': 'movie_id', 'gross':'domestic_gross', 'theaters': 'domestic_theaters_count'}))
 
-    return str(os.path.join(folder_path, f"cleaned_weekly_domestic_performance.csv"))
+    if not return_df:
+        folder_path = data_path
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+        interested_final_df.to_csv(os.path.join(folder_path, f"cleaned_weekly_domestic_performance.csv"), index=False)
+
+        return str(os.path.join(folder_path, f"cleaned_weekly_domestic_performance.csv"))
+    else:
+        return interested_final_df
 
 if __name__ == "__main__":
     #get_clean_weekly_domestic_performance()

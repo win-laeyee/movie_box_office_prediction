@@ -1,7 +1,7 @@
 from airflow import DAG #type: ignore
 from airflow.operators.python import PythonOperator #type:ignore
 from googlecloud.create_table_bigquery import delete_all_tables, create_dataset_if_not_exists, create_all_tables #type:ignore
-from googlecloud.upload_initial_data_bigquery import upload_csv_to_table #type:ignore
+from googlecloud.upload_initial_data_bigquery import upload_csv_to_table, upload_df_to_table #type:ignore
 from extraction.tmdb_collection.collection import clean_raw_collections_details #type:ignore
 from extraction.boxoffice_api.boxoffice_clean_per_erd import get_clean_weekly_domestic_performance #type:ignore
 from datetime import datetime, timedelta
@@ -39,9 +39,8 @@ def etl_tmdb_collection_task():
     project_id = "is3107-418809"
     dataset_id = "movie_dataset"
     table_id = "collection"
-    filepath = './historical_data/clean_historical_data'
-    clean_filepath = clean_raw_collections_details(filepath)
-    upload_csv_to_table(project_id, dataset_id, table_id, clean_filepath, mode="truncate")
+    df = clean_raw_collections_details('', return_df = True)
+    upload_df_to_table(project_id, dataset_id, table_id, df, mode="truncate")
 
 def etl_weekly_domestic_performance_task():
     """
@@ -56,8 +55,8 @@ def etl_weekly_domestic_performance_task():
     dataset_id = "movie_dataset"
     table_id = "weekly_domestic_performance"
     filepath = './historical_data/clean_historical_data'
-    clean_filepath = get_clean_weekly_domestic_performance(filepath)
-    upload_csv_to_table(project_id, dataset_id, table_id, clean_filepath, mode="truncate")
+    df = get_clean_weekly_domestic_performance('', return_df = True)
+    upload_df_to_table(project_id, dataset_id, table_id, df, mode="truncate")
 
 
 # Airflow DAG

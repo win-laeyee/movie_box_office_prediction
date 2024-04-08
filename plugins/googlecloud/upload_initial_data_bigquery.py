@@ -3,17 +3,64 @@ import os
 import pandas as pd
 from datetime import datetime
 
-#may want create a dag to upload clean initial data to bigquery
-def upload_csv_to_table(project_id, dataset_id, table_id, csv_file_path, mode):
-    """mode can be (append, truncate or empty)"""
+def upload_df_to_table(project_id, dataset_id, table_id, df, mode):
+    """
+    Uploads a pandas DataFrame to a BigQuery table.
+
+    Args:
+        project_id (str): The ID of the Google Cloud project.
+        dataset_id (str): The ID of the BigQuery dataset.
+        table_id (str): The ID of the BigQuery table.
+        df (pandas.DataFrame): The DataFrame to be uploaded.
+        mode (str): The write mode for the table. Possible values are "append", "truncate", or "empty".
+
+    Returns:
+        None
+    """
+    
     script_dir = os.path.dirname(os.path.realpath(__file__))
     json_path = os.path.join(script_dir, "is3107-418809-62c002a9f1f7.json")
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
 
-    # Initialize BigQuery client
     client = bigquery.Client(project=project_id)
+    table_ref = client.dataset(dataset_id).table(table_id)
+    
+    # Define job configuration
+    job_config = bigquery.LoadJobConfig()
+    if mode == "append":
+        job_config.write_disposition = bigquery.WriteDisposition.WRITE_APPEND
+    elif mode == "truncate":
+        job_config.write_disposition = bigquery.WriteDisposition.WRITE_TRUNCATE
+    elif mode == "empty":
+        job_config.write_disposition = bigquery.WriteDisposition.WRITE_EMPTY  # Write only when tables empty - ensure no any overwrite
 
-    # Define the table reference
+    df['insertion_datetime'] = datetime.now() #create new column if not exist and save to same file
+    job = client.load_table_from_dataframe(df, table_ref, job_config=job_config)
+    job.result() # Wait for the job to complete
+
+    print(f"Dataframe uploaded to table {table_id} in dataset {dataset_id} successfully.")
+
+
+def upload_csv_to_table(project_id, dataset_id, table_id, csv_file_path, mode):
+    """
+    Uploads a CSV file to a BigQuery table.
+
+    Args:
+        project_id (str): The ID of the Google Cloud project.
+        dataset_id (str): The ID of the BigQuery dataset.
+        table_id (str): The ID of the BigQuery table.
+        csv_file_path (str): The file path of the CSV file to upload.
+        mode (str): The write mode for the table. Possible values are "append", "truncate", or "empty".
+
+    Returns:
+        None
+    """
+    
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    json_path = os.path.join(script_dir, "is3107-418809-62c002a9f1f7.json")
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
+
+    client = bigquery.Client(project=project_id)
     table_ref = client.dataset(dataset_id).table(table_id)
 
     # Define job configuration
