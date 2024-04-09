@@ -1,7 +1,6 @@
 import os
 import pickle
 import datetime
-import logging
 
 CACHE_DIR = "cache"
 os.makedirs(CACHE_DIR, exist_ok=True)
@@ -24,13 +23,13 @@ def save_to_cache(data, cache_file):
 def query_or_load_from_cache(query_function, table_name):
     cache_file = os.path.join(CACHE_DIR, f"{table_name}.pkl")
     if is_cache_fresh(cache_file):
-        logging.info("Data loaded from cache")
+        print("Data loaded from cache")
         return load_from_cache(cache_file)
     else:
         data = query_function()
-        logging.info("Data queried from Big Query")
+        print("Data queried from Big Query")
         save_to_cache(data, cache_file)
-        logging.info("Data saved to cache for querying next time")
+        print("Data saved to cache for querying next time")
 
         return data
 
@@ -39,7 +38,7 @@ def clear_cache():
         file_path = os.path.join(CACHE_DIR, filename)
         try:
             if os.path.isfile(file_path):
-                logging.info("Cleared cache")
+                print("Cleared cache")
                 os.unlink(file_path)
         except Exception as e:
             print(f"Failed to delete {file_path}: {e}")
