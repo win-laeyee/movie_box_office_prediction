@@ -1,8 +1,19 @@
 import streamlit as st
 import pandas as pd
-from src.utils.dataframe_utils import get_top_5_movies, get_rev_over_time, get_all_unique_genres, get_movie_details, get_popularity_over_time, calculate_director_producer_profit_margin, merge_movie_collection, merge_movie_weekly_performance, calculate_avg_rev_by_actor, include_profit_in_df, calculate_roi, merge_movie_video_stats
-import matplotlib.pyplot as plt
-import seaborn as sns
+from src.utils import (
+    get_top_5_movies, 
+    get_rev_over_time, 
+    get_all_unique_genres, 
+    get_movie_details, 
+    get_popularity_over_time, 
+    calculate_director_producer_profit_margin, 
+    merge_movie_collection, 
+    merge_movie_weekly_performance, 
+    calculate_avg_rev_by_actor, 
+    include_profit_in_df, 
+    calculate_roi, 
+    merge_movie_video_stats
+)
 import altair as alt
 
 
@@ -350,9 +361,3 @@ def dashboard():
     st.markdown('<h3>Top 5 Movies by Box Office Revenue</h3>', unsafe_allow_html=True)
     df = get_top_5_movies()   
     st.dataframe(df)
-
-
-    # button
-    if st.button("Predict my movie performance", key = "go_to_input_field"):
-        print("Predict button clicked")
-        st.session_state.page = "Input Fields"
