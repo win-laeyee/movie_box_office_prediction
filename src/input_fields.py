@@ -1,8 +1,7 @@
 import streamlit as st
-from src import dashboard
 
 def input_fields():
-    st.title("Input Movie Data To Predict")
+    st.title("🎩 Input Movie Data To Predict")
 
     # Text Input
     title = st.text_input("Enter movie title:", "")
@@ -23,5 +22,5 @@ def input_fields():
     
     if st.button("Predict", key = "go_to_dashboard"):
         print("Predict button clicked")
-        st.session_state.page = "Dashboard"
+        st.session_state['page'] = "Dashboard"
         print("Session state page set to Dashboard")

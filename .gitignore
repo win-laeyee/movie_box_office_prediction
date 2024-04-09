@@ -23,5 +23,8 @@ logs/
 /notebook_experiments
 
 
-#ignore googlecloud config
+# Ignore googlecloud config
 googlecloud/is3107-418809-62c002a9f1f7.json
+
+# Ignore DS_Store
+.DS_Store
