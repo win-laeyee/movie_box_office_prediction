@@ -17,6 +17,7 @@ from src.utils import (
 import altair as alt
 
 
+
 def dashboard():
 
     st.title('🎥 Movie Performance Dashboard')
@@ -33,46 +34,64 @@ def dashboard():
     lowest_revenue_movie = video_stats_df.loc[video_stats_df['revenue'].idxmin()]
     lowest_vote_average_movie = video_stats_df.loc[video_stats_df['tmdb_vote_average'].idxmin()]
     lowest_view_count_movie = video_stats_df.loc[video_stats_df['view_count'].idxmin()]
+    
+    print(highest_revenue_movie, highest_vote_average_movie, highest_view_count_movie)
+    print(lowest_revenue_movie, lowest_vote_average_movie, lowest_view_count_movie)
 
     st.markdown('<h3>Top Movie Metrics</h3>', unsafe_allow_html=True)
+    st.write(
+        """
+        <style>
+        [data-testid="stMetricDelta"] svg {
+            display: none;
+        }
+        [data-testid="stMetricValue"] {
+            font-size: 24px;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
     col1, col2, col3 = st.columns(3)
     with col1:
         st.metric(
-            label="Highest Revenue",
+            label=":green[Highest Revenue]",
             value=highest_revenue_movie['original_title'],
-            delta="${:,.0f}".format(highest_revenue_movie['revenue']),
+            delta="${:,.2f}".format(highest_revenue_movie['revenue']),
             delta_color="normal"
         )
         st.metric(
-            label="Lowest Revenue",
+            label=":red[Lowest Revenue]",
             value=lowest_revenue_movie['original_title'],
-            delta=f"${-abs(lowest_revenue_movie['revenue']):,}",
+            delta="${:,.2f}".format(lowest_revenue_movie['revenue']),
             delta_color="inverse"
         )
     with col2:
         st.metric(
-            label="Highest TMDB Vote Average",
+            label=":green[Highest TMDB Vote Average]",
             value=highest_vote_average_movie['original_title'],
             delta="{:.1f}".format(highest_vote_average_movie['tmdb_vote_average']),
             delta_color="normal"
         )
         st.metric(
-            label="Lowest TMDB Vote Average",
+            label=":red[Lowest TMDB Vote Average] ",
             value=lowest_vote_average_movie['original_title'],
-            delta=f"{-abs(lowest_vote_average_movie['tmdb_vote_average']):.1f}",
+            delta="{:.1f}".format(lowest_vote_average_movie['tmdb_vote_average']),
+            delta_color="inverse"        
         )
 
     with col3:
         st.metric(
-            label="Highest View Count",
+            label=":green[Highest View Count]",
             value=highest_view_count_movie['original_title'],
-            delta="{:,}".format(highest_view_count_movie['view_count']),
+            delta="{:,.0f}".format(highest_view_count_movie['view_count']),
             delta_color="normal"
         )
         st.metric(
-            label="Lowest View Count",
+            label=":red[Lowest View Count]",
             value=lowest_view_count_movie['original_title'],
-            delta=f"{-abs(lowest_view_count_movie['view_count']):,}",
+            delta="{:,.0f}".format(lowest_view_count_movie['view_count']),
+            delta_color="inverse"
         )
 
 
@@ -361,3 +380,4 @@ def dashboard():
     st.markdown('<h3>Top 5 Movies by Box Office Revenue</h3>', unsafe_allow_html=True)
     df = get_top_5_movies()   
     st.dataframe(df)
+dashboard()
