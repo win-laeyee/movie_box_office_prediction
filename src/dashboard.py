@@ -15,7 +15,7 @@ from src.utils import (
     merge_movie_video_stats
 )
 import altair as alt
-
+import ast
 
 
 def dashboard():
@@ -34,9 +34,6 @@ def dashboard():
     lowest_revenue_movie = video_stats_df.loc[video_stats_df['revenue'].idxmin()]
     lowest_vote_average_movie = video_stats_df.loc[video_stats_df['tmdb_vote_average'].idxmin()]
     lowest_view_count_movie = video_stats_df.loc[video_stats_df['view_count'].idxmin()]
-    
-    print(highest_revenue_movie, highest_vote_average_movie, highest_view_count_movie)
-    print(lowest_revenue_movie, lowest_vote_average_movie, lowest_view_count_movie)
 
     st.markdown('<h3>Top Movie Metrics</h3>', unsafe_allow_html=True)
     st.write(
@@ -103,7 +100,7 @@ def dashboard():
         'Choose Revenue or Profit',
         options=['Revenue', 'Profit'],
         index=0,
-        key="rev_over_time"
+        key="rev_over_time_selectbox"
     )
     all_genres = get_all_unique_genres()
     selected_genres = st.multiselect('Select Genre(s):', all_genres, default=all_genres, key="genre_rev_over_time_multiselect")
@@ -147,7 +144,8 @@ def dashboard():
     y_axis_metric = st.selectbox(
         'Choose the Y-axis metric:',
         options=['TMDB Popularity', 'TMDB Vote Average', 'TMDB Vote Count'],
-        index=0 
+        index=0,
+        key="y_axis_metric_selectbox"
     )
     y_metric_mapping = {'TMDB Popularity': 'tmdb_popularity', 'TMDB Vote Average': 'tmdb_vote_average', 'TMDB Vote Count': 'tmdb_vote_count'}
 
@@ -193,7 +191,7 @@ def dashboard():
 
     # graph
     st.markdown('<h3>Budget VS Revenue</h3>', unsafe_allow_html=True)
-    rev_or_profit = st.selectbox(
+    budget_vs_rev = st.selectbox(
         'Choose Revenue or Profit',
         options=['Revenue', 'Profit'],
         index=0,
@@ -203,12 +201,12 @@ def dashboard():
     movie_df = include_profit_in_df(movie_df)
     scatter_chart = alt.Chart(movie_df).mark_circle(size=60).encode(
         x=alt.X('budget:Q', axis=alt.Axis(title='Budget')),
-        y=alt.Y(f'{rev_or_profit.lower()}:Q', axis=alt.Axis(title=rev_or_profit)),
-        tooltip=['budget', f'{rev_or_profit.lower()}']
+        y=alt.Y(f'{budget_vs_rev.lower()}:Q', axis=alt.Axis(title=budget_vs_rev)),
+        tooltip=['budget', f'{budget_vs_rev.lower()}']
     ).interactive()
 
     regression_line = scatter_chart.transform_regression(
-        'budget', f'{rev_or_profit.lower()}', method='linear'
+        'budget', f'{budget_vs_rev.lower()}', method='linear'
     ).mark_line(color='red')
     final_chart = scatter_chart + regression_line
     st.altair_chart(final_chart, use_container_width=True)
@@ -221,7 +219,8 @@ def dashboard():
     person = st.selectbox(
         'Choose director or producer:',
         options=['Director', 'Producer'],
-        index=0 
+        index=0,
+        key="person_selectbox"
     )
     director_profit_margin = calculate_director_producer_profit_margin(person)
     director_profit_margin = director_profit_margin.sort_values('profit_margin', ascending=False)
@@ -379,5 +378,13 @@ def dashboard():
     # graph
     st.markdown('<h3>Top 5 Movies by Box Office Revenue</h3>', unsafe_allow_html=True)
     df = get_top_5_movies()   
-    st.dataframe(df)
-dashboard()
+    df['Genres'] = df['Genres'].apply(lambda x: ', '.join(ast.literal_eval(x)) if isinstance(x, str) else ', '.join(x))
+    st.dataframe(df.style.
+                 highlight_max(subset='Revenue', color='#A6E0B5').
+                 highlight_max(subset='TMDB Popularity', color='#A6E0B5').
+                 highlight_max(subset='TMDB Vote Average', color='#A6E0B5').
+                 highlight_min(subset='Revenue', color='#FC8D8D').
+                 highlight_min(subset='TMDB Popularity', color='#FC8D8D').
+                 highlight_min(subset='TMDB Vote Average', color='#FC8D8D'), 
+                 column_order = ('Movie Title', 'Revenue', 'TMDB Popularity', 'TMDB Vote Average', 'Genres'),
+                 hide_index = True)
