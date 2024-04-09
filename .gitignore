@@ -6,6 +6,7 @@ src/__pycache__/
 dags/__pycache__/
 src/utils/__pycache__
 __pycache__/
+**/__pycache__/
 
 # Ignore environment-specific files
 .env
@@ -18,13 +19,14 @@ __pycache__/
 logs/
 *.log
 
-
 # Ignore experiment files
 /notebook_experiments
-
 
 # Ignore googlecloud config
 googlecloud/is3107-418809-62c002a9f1f7.json
 
 # Ignore DS_Store
 .DS_Store
+
+# Ignore raw_movie_details related ndjson 
+historical_data/raw_historical_data/tmdb/*.ndjson

@@ -2,12 +2,16 @@ from google.cloud import storage
 from io import BytesIO
 from pathlib import Path
 import pandas as pd
+import json
 import os
 
 
 def list_blobs(bucket_name, prefix=None):
     """Lists files in a Google Cloud Storage bucket"""
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "googlecloud/is3107-418809-62c002a9f1f7.json"
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    json_path = os.path.join(script_dir, "is3107-418809-62c002a9f1f7.json")
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
+
     storage_client = storage.Client()
     bucket = storage_client.bucket(bucket_name)
     blobs = bucket.list_blobs(prefix=prefix)
@@ -19,8 +23,10 @@ def list_blobs(bucket_name, prefix=None):
     return [blob.name for blob in blobs]
 
 
-def read_blob(bucket_name, blob_name):
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "googlecloud/is3107-418809-62c002a9f1f7.json"
+def read_blob(bucket_name, blob_name, json_as_dict=False):
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    json_path = os.path.join(script_dir, "is3107-418809-62c002a9f1f7.json")
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
     
     """Reads the contents of a blob from the Google Cloud Storage bucket."""
     # Initialize a client
@@ -39,7 +45,10 @@ def read_blob(bucket_name, blob_name):
         df = pd.read_csv(content)
     elif blob_name.endswith(".ndjson"):
         df = pd.read_json(content, lines=True)
-    elif blob_name.endwith(".json"):
+    elif blob_name.endswith(".json") and not json_as_dict:
         df = pd.read_json(content)
+    elif blob_name.endswith(".json") and json_as_dict:
+        content.seek(0) # Reset the file pointer to the start
+        df = json.load(content)
 
     return df

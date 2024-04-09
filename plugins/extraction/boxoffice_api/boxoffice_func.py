@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 sys.path.append(str(Path.cwd()))
-from extraction.boxoffice_api import BoxOffice 
+from extraction.boxoffice_api.boxoffice_app import BoxOffice 
 import os
 import logging
 from importlib import reload
@@ -20,7 +20,7 @@ def data_by_year_week(box_office_obj, year:int, week:str) -> pd.DataFrame:
     sub_df.insert(0, "year", year)
     return sub_df
 
-def get_batch_dataset(start_year:int=2021, end_year:int=2024) -> None:
+def get_batch_dataset(datapath:str, start_year:int=2021, end_year:int=2024) -> None:
     #configuration
     reload(logging)
     logging.basicConfig(level=logging.INFO)
@@ -35,7 +35,7 @@ def get_batch_dataset(start_year:int=2021, end_year:int=2024) -> None:
     if start_year <= now_year and end_year <= now_year:
         logging.info(f"Start Data Extraction")
 
-        for year in np.array(range(start_year, now_year+1)):
+        for year in np.array(range(start_year, end_year+1)):
             logging.info(f"{year=}")
             if year < now_year:
                 for week in weeks_array:
@@ -46,7 +46,7 @@ def get_batch_dataset(start_year:int=2021, end_year:int=2024) -> None:
                     
         logging.info(f"End Data Extraction")
         
-        data_path = "./raw_data/boxofficemojo_rawdata"
+        data_path = datapath
         if not os.path.exists(data_path):
             os.makedirs(data_path)
 
