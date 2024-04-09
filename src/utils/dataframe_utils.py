@@ -27,11 +27,12 @@ def get_top_5_movies():
     movie_details_df = get_movie_details()
     top_movies = movie_details_df.sort_values(by='revenue', ascending=False).head(5)
     columns_to_display = [
-        'original_title', 'genres', 'revenue', 'budget', 'release_date',
-        'tmdb_popularity', 'tmdb_vote_average', 'tmdb_vote_count'
+        'original_title', 'genres', 'revenue',
+        'tmdb_popularity', 'tmdb_vote_average'
     ]
     top_movies_display = top_movies[columns_to_display]
-
+    column_names_to_display = ['Movie Title', 'Genres', 'Revenue', 'TMDB Popularity', 'TMDB Vote Average']
+    top_movies_display.columns = column_names_to_display
     return top_movies_display
 
 
