@@ -2,6 +2,7 @@ from google.cloud import storage
 from io import BytesIO
 from pathlib import Path
 import pandas as pd
+import json
 import os
 
 
@@ -22,7 +23,7 @@ def list_blobs(bucket_name, prefix=None):
     return [blob.name for blob in blobs]
 
 
-def read_blob(bucket_name, blob_name):
+def read_blob(bucket_name, blob_name, json_as_dict=False):
     script_dir = os.path.dirname(os.path.realpath(__file__))
     json_path = os.path.join(script_dir, "is3107-418809-62c002a9f1f7.json")
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
@@ -44,7 +45,10 @@ def read_blob(bucket_name, blob_name):
         df = pd.read_csv(content)
     elif blob_name.endswith(".ndjson"):
         df = pd.read_json(content, lines=True)
-    elif blob_name.endwith(".json"):
+    elif blob_name.endswith(".json") and not json_as_dict:
         df = pd.read_json(content)
+    elif blob_name.endswith(".json") and json_as_dict:
+        content.seek(0) # Reset the file pointer to the start
+        df = json.load(content)
 
     return df

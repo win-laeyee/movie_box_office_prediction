@@ -1,9 +1,21 @@
 import streamlit as st
 import pandas as pd
-from src.utils.dataframe_utils import get_top_5_movies, get_rev_over_time, get_all_unique_genres, get_movie_details, get_popularity_over_time, calculate_director_producer_profit_margin, merge_movie_collection, merge_movie_weekly_performance, calculate_avg_rev_by_actor, include_profit_in_df, calculate_roi, merge_movie_video_stats
-import matplotlib.pyplot as plt
-import seaborn as sns
+from src.utils import (
+    get_top_5_movies, 
+    get_rev_over_time, 
+    get_all_unique_genres, 
+    get_movie_details, 
+    get_popularity_over_time, 
+    calculate_director_producer_profit_margin, 
+    merge_movie_collection, 
+    merge_movie_weekly_performance, 
+    calculate_avg_rev_by_actor, 
+    include_profit_in_df, 
+    calculate_roi, 
+    merge_movie_video_stats
+)
 import altair as alt
+import ast
 
 
 def dashboard():
@@ -24,44 +36,59 @@ def dashboard():
     lowest_view_count_movie = video_stats_df.loc[video_stats_df['view_count'].idxmin()]
 
     st.markdown('<h3>Top Movie Metrics</h3>', unsafe_allow_html=True)
+    st.write(
+        """
+        <style>
+        [data-testid="stMetricDelta"] svg {
+            display: none;
+        }
+        [data-testid="stMetricValue"] {
+            font-size: 24px;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
     col1, col2, col3 = st.columns(3)
     with col1:
         st.metric(
-            label="Highest Revenue",
+            label=":green[Highest Revenue]",
             value=highest_revenue_movie['original_title'],
-            delta="${:,.0f}".format(highest_revenue_movie['revenue']),
+            delta="${:,.2f}".format(highest_revenue_movie['revenue']),
             delta_color="normal"
         )
         st.metric(
-            label="Lowest Revenue",
+            label=":red[Lowest Revenue]",
             value=lowest_revenue_movie['original_title'],
-            delta=f"${-abs(lowest_revenue_movie['revenue']):,}",
+            delta="${:,.2f}".format(lowest_revenue_movie['revenue']),
             delta_color="inverse"
         )
     with col2:
         st.metric(
-            label="Highest TMDB Vote Average",
+            label=":green[Highest TMDB Vote Average]",
             value=highest_vote_average_movie['original_title'],
             delta="{:.1f}".format(highest_vote_average_movie['tmdb_vote_average']),
             delta_color="normal"
         )
         st.metric(
-            label="Lowest TMDB Vote Average",
+            label=":red[Lowest TMDB Vote Average] ",
             value=lowest_vote_average_movie['original_title'],
-            delta=f"{-abs(lowest_vote_average_movie['tmdb_vote_average']):.1f}",
+            delta="{:.1f}".format(lowest_vote_average_movie['tmdb_vote_average']),
+            delta_color="inverse"        
         )
 
     with col3:
         st.metric(
-            label="Highest View Count",
+            label=":green[Highest View Count]",
             value=highest_view_count_movie['original_title'],
-            delta="{:,}".format(highest_view_count_movie['view_count']),
+            delta="{:,.0f}".format(highest_view_count_movie['view_count']),
             delta_color="normal"
         )
         st.metric(
-            label="Lowest View Count",
+            label=":red[Lowest View Count]",
             value=lowest_view_count_movie['original_title'],
-            delta=f"{-abs(lowest_view_count_movie['view_count']):,}",
+            delta="{:,.0f}".format(lowest_view_count_movie['view_count']),
+            delta_color="inverse"
         )
 
 
@@ -73,7 +100,7 @@ def dashboard():
         'Choose Revenue or Profit',
         options=['Revenue', 'Profit'],
         index=0,
-        key="rev_over_time"
+        key="rev_over_time_selectbox"
     )
     all_genres = get_all_unique_genres()
     selected_genres = st.multiselect('Select Genre(s):', all_genres, default=all_genres, key="genre_rev_over_time_multiselect")
@@ -117,7 +144,8 @@ def dashboard():
     y_axis_metric = st.selectbox(
         'Choose the Y-axis metric:',
         options=['TMDB Popularity', 'TMDB Vote Average', 'TMDB Vote Count'],
-        index=0 
+        index=0,
+        key="y_axis_metric_selectbox"
     )
     y_metric_mapping = {'TMDB Popularity': 'tmdb_popularity', 'TMDB Vote Average': 'tmdb_vote_average', 'TMDB Vote Count': 'tmdb_vote_count'}
 
@@ -163,7 +191,7 @@ def dashboard():
 
     # graph
     st.markdown('<h3>Budget VS Revenue</h3>', unsafe_allow_html=True)
-    rev_or_profit = st.selectbox(
+    budget_vs_rev = st.selectbox(
         'Choose Revenue or Profit',
         options=['Revenue', 'Profit'],
         index=0,
@@ -173,12 +201,12 @@ def dashboard():
     movie_df = include_profit_in_df(movie_df)
     scatter_chart = alt.Chart(movie_df).mark_circle(size=60).encode(
         x=alt.X('budget:Q', axis=alt.Axis(title='Budget')),
-        y=alt.Y(f'{rev_or_profit.lower()}:Q', axis=alt.Axis(title=rev_or_profit)),
-        tooltip=['budget', f'{rev_or_profit.lower()}']
+        y=alt.Y(f'{budget_vs_rev.lower()}:Q', axis=alt.Axis(title=budget_vs_rev)),
+        tooltip=['budget', f'{budget_vs_rev.lower()}']
     ).interactive()
 
     regression_line = scatter_chart.transform_regression(
-        'budget', f'{rev_or_profit.lower()}', method='linear'
+        'budget', f'{budget_vs_rev.lower()}', method='linear'
     ).mark_line(color='red')
     final_chart = scatter_chart + regression_line
     st.altair_chart(final_chart, use_container_width=True)
@@ -191,7 +219,8 @@ def dashboard():
     person = st.selectbox(
         'Choose director or producer:',
         options=['Director', 'Producer'],
-        index=0 
+        index=0,
+        key="person_selectbox"
     )
     director_profit_margin = calculate_director_producer_profit_margin(person)
     director_profit_margin = director_profit_margin.sort_values('profit_margin', ascending=False)
@@ -349,10 +378,13 @@ def dashboard():
     # graph
     st.markdown('<h3>Top 5 Movies by Box Office Revenue</h3>', unsafe_allow_html=True)
     df = get_top_5_movies()   
-    st.dataframe(df)
-
-
-    # button
-    if st.button("Predict my movie performance", key = "go_to_input_field"):
-        print("Predict button clicked")
-        st.session_state.page = "Input Fields"
+    df['Genres'] = df['Genres'].apply(lambda x: ', '.join(ast.literal_eval(x)) if isinstance(x, str) else ', '.join(x))
+    st.dataframe(df.style.
+                 highlight_max(subset='Revenue', color='#A6E0B5').
+                 highlight_max(subset='TMDB Popularity', color='#A6E0B5').
+                 highlight_max(subset='TMDB Vote Average', color='#A6E0B5').
+                 highlight_min(subset='Revenue', color='#FC8D8D').
+                 highlight_min(subset='TMDB Popularity', color='#FC8D8D').
+                 highlight_min(subset='TMDB Vote Average', color='#FC8D8D'), 
+                 column_order = ('Movie Title', 'Revenue', 'TMDB Popularity', 'TMDB Vote Average', 'Genres'),
+                 hide_index = True)

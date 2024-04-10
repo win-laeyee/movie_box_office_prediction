@@ -3,5 +3,8 @@ pandas==2.2.1
 requests==2.31.0
 bs4==0.0.2
 google-api-python-client==2.122.0
-google-cloud-bigquery==3.19.0
+google-cloud-bigquery==3.20.1
 google-cloud-storage==2.16.0
+python-dotenv==1.0.1
+db-dtypes==1.2.0
+altair==5.2.0

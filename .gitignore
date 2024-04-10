@@ -21,9 +21,15 @@ logs/
 
 # Ignore experiment files
 /notebook_experiments
+test.py
 
-#ignore googlecloud config
+# Ignore secrets
 googlecloud/is3107-418809-62c002a9f1f7.json
+secrets/
 
-#others 
+# Ignore DS_Store
 .DS_Store
+
+# Ignore raw_movie_details related ndjson 
+historical_data/raw_historical_data/tmdb/*.ndjson
+

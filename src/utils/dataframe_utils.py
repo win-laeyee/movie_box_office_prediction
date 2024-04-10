@@ -1,25 +1,32 @@
 import pandas as pd
 import ast 
 import numpy as np
+from src.utils.bigquery_utils import query_movie_details, query_video_stats, query_collection_info, query_weekly_domestic_performance, query_people_info
+from src.utils.cache_utils import query_or_load_from_cache
 
 def get_movie_details():
-    df = pd.read_csv('../is3107_data/clean_movie_details.csv')
+    df = query_or_load_from_cache(query_movie_details, "movie_details")
+    # df = pd.read_csv('../is3107_data/clean_movie_details.csv')
     return df
 
 def get_video_stats():
-    df = pd.read_csv('../is3107_data/clean_video_stats.csv')
+    df = query_or_load_from_cache(query_video_stats, "clean_video_stats")
+    # df = pd.read_csv('../is3107_data/clean_video_stats.csv')
     return df
 
 def get_collection_info():
-    df = pd.read_csv('../is3107_data/cleaned_collection_info.csv')
+    df = query_or_load_from_cache(query_collection_info, "collection_info")
+    # df = pd.read_csv('../is3107_data/cleaned_collection_info.csv')
     return df
 
 def get_weekly_domestic_performance():
-    df = pd.read_csv('../is3107_data/cleaned_weekly_domestic_performance.csv')
+    df = query_or_load_from_cache(query_weekly_domestic_performance, "weekly_domestic_performance")
+    # df = pd.read_csv('../is3107_data/cleaned_weekly_domestic_performance.csv')
     return df
 
 def get_people_info():
-    df = pd.read_csv('../is3107_data/people_info.csv')
+    df = query_or_load_from_cache(query_people_info, "people_info")
+    # df = pd.read_csv('../is3107_data/people_info.csv')
     return df
 
 
@@ -27,11 +34,12 @@ def get_top_5_movies():
     movie_details_df = get_movie_details()
     top_movies = movie_details_df.sort_values(by='revenue', ascending=False).head(5)
     columns_to_display = [
-        'original_title', 'genres', 'revenue', 'budget', 'release_date',
-        'tmdb_popularity', 'tmdb_vote_average', 'tmdb_vote_count'
+        'original_title', 'genres', 'revenue',
+        'tmdb_popularity', 'tmdb_vote_average'
     ]
     top_movies_display = top_movies[columns_to_display]
-
+    column_names_to_display = ['Movie Title', 'Genres', 'Revenue', 'TMDB Popularity', 'TMDB Vote Average']
+    top_movies_display.columns = column_names_to_display
     return top_movies_display
 
 
@@ -39,8 +47,8 @@ def merge_movie_weekly_performance():
     df_time = get_weekly_domestic_performance()
     df_rev = get_movie_details()
     merged_df = pd.merge(df_time, df_rev, left_on='id', right_on='movie_id', how='inner', suffixes=('_time', '_rev'))
-    merged_df = merged_df.drop(columns=['Unnamed: 0'])
-    merged_df = merged_df.drop(columns=['id'])
+    # merged_df = merged_df.drop(columns=['Unnamed: 0'])
+    # merged_df = merged_df.drop(columns=['id'])
     return merged_df
 
 def include_profit_in_df(df):
@@ -129,7 +137,7 @@ def merge_movie_collection():
     collection_df = get_collection_info()
 
     merged_df = pd.merge(movie_df, collection_df, left_on='collection_id', right_on='collection_id', how='inner')
-    merged_df = merged_df.drop(columns=['Unnamed: 0'])
+    # merged_df = merged_df.drop(columns=['Unnamed: 0'])
     return merged_df
 
 
@@ -175,4 +183,3 @@ def merge_movie_video_stats():
     merged_df = pd.merge(movie_df, video_stats_df, left_on='movie_id', right_on='movie_id', how='inner')
     return merged_df
 
-merge_movie_video_stats()
