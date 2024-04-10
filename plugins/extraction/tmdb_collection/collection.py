@@ -13,6 +13,7 @@ from importlib import reload
 import concurrent.futures
 import json
 
+
 def get_tmdb_collection_id_gcs() -> pd.Series:
     """
     Retrieves the TMDB collection IDs from files stored in Google Cloud Storage (GCS).
@@ -30,7 +31,6 @@ def get_tmdb_collection_id_gcs() -> pd.Series:
         file_content = file_content.dropna()
         df = pd.concat([df, file_content], axis=0)
     return pd.json_normalize(df['belongs_to_collection'])["id"].astype(int)
-
 
 def chunks(series: pd.Series, length_pieces: int = 20):
     """
