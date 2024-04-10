@@ -32,7 +32,7 @@ def etl_video_stats_task():
 
     This function performs the following steps:
     1. Calls the `clean_raw_video_statistics` function to clean the raw video statistics data retrieved from gcs.
-    3. Calls the `upload_df_to_table` function to upload the cleaned data to the BigQuery collection table.
+    2. Calls the `upload_df_to_table` function to upload the cleaned data to the BigQuery collection table.
     """
     project_id = "is3107-418809"
     dataset_id = "movie_dataset"
@@ -87,5 +87,4 @@ with DAG(dag_id = 'initialise_bigquery', default_args=default_args, schedule_int
     etl_tmdb_collection = PythonOperator(task_id='etl_tmdb_collection', python_callable=etl_tmdb_collection_task)
     etl_weekly_domestic_performance = PythonOperator(task_id='etl_weekly_domestic_performance', python_callable=etl_weekly_domestic_performance_task)
 
-    etl_video_stats
-    # setup_bigquery >> [etl_tmdb_movie, etl_tmdb_person, etl_video_stats, etl_tmdb_collection, etl_weekly_domestic_performance]
+    setup_bigquery >> [etl_tmdb_movie, etl_tmdb_person, etl_video_stats, etl_tmdb_collection, etl_weekly_domestic_performance]
