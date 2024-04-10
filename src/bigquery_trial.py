@@ -78,9 +78,58 @@ def create_model():
     output = query_job.result()
     print(output)
 
+def prep_data_for_ml():
+    client = bigquery.Client.from_service_account_json(keyfile_path)
+    QUERY = (
+        """ 
+        SELECT
+        revenue,
+        budget,
+        release_date,
+        runtime,
+        tmdb_vote_count,
+        cast(cast1_id as string) as cast1_id,
+        cast(cast2_id as string) as cast2_id,
+        cast(director_id as string) as director_id,
+        cast(producer_id as string) as producer_id
+        from
+        IS3107.movie_details
+        """)
+
+def predict_revenue():
+    client = bigquery.Client.from_service_account_json(keyfile_path)
+    budget = 350000
+    QUERY = (
+        f"""
+        SELECT
+          predicted_label as predicted_revenue
+        FROM
+        ML.PREDICT(MODEL `IS3107.test_model_4`, (
+          SELECT
+            {budget} AS budget,
+            cast(null as date) AS release_date,
+            124 AS runtime,
+            10 AS cast1_popularity,
+            null AS cast2_popularity,
+            6 AS director_popularity,
+            1.2 AS producer_popularity,
+            25 AS tmdb_popularity,
+            7 AS tmdb_vote_average,
+            1789 AS tmdb_vote_count,
+            2209901 AS view_count,
+            17584 AS like_count,
+            1019 AS comment_count,
+            null AS avg_popularity_before_2020))
+        """
+    )
+    query_job = client.query(QUERY) # API request
+    data = query_job.result().to_dataframe()   # Waits for query to finish and write into a df
+
+    print(data)
+    return data
 
 # try creating a model directly using movie_details data
-create_model()
+predict_revenue()
 
 """
 Apparently Bigquery free service does not include DML queries, 
