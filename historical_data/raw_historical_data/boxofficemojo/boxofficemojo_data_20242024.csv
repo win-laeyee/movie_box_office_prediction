@@ -342,7 +342,7 @@ year,week,Rank,LW,Release,Gross,%± LW,Theaters,Change,Average,Total Gross,Weeks
 2024,6,17,13,The Zone of Interest,"$1,056,665",-39.3%,598,+4,"$1,766","$6,284,012",10,A24
 2024,6,18,-,Turning Red,"$810,341",-,"1,560",-,$519,"$810,341",1,Walt Disney Studios Motion Pictures
 2024,6,19,-,The Chosen: S4 Episodes 4-6,"$783,380",-,"2,216",-,$353,"$783,380",1,Fathom Events
-2024,6,20,-,DuneIMAX,"$570,000",-,"2,100",-,$271,"$570,000",1,IMAX
+2024,6,20,-,Dune: Part OneIMAX,"$570,000",-,"2,100",-,$271,"$570,000",1,IMAX
 2024,6,21,-,The Taste of Things,"$459,023",-,3,-,"$153,007","$459,023",1,IFC Films
 2024,6,22,15,The Iron Claw,"$439,116",-49.1%,425,-209,"$1,033","$34,853,797",8,A24
 2024,6,23,14,Origin,"$402,470",-57.4%,348,-283,"$1,156","$4,142,662",10,-
@@ -388,9 +388,9 @@ year,week,Rank,LW,Release,Gross,%± LW,Theaters,Change,Average,Total Gross,Weeks
 2024,6,63,57,Disco Boy,"$3,191",-15.8%,3,+2,"$1,063","$6,979",2,Big World Pictures
 2024,6,64,31,Fitting In,"$2,980",-96.4%,17,-168,$175,"$86,875",2,Blue Fox Entertainment
 2024,6,65,53,Priscilla,"$2,885",-39.6%,2,-6,"$1,442","$20,960,939",16,A24
-2024,6,66,56,Weak Layers,"$1,813",-53%,5,-4,$362,"$154,445",6,Greenwich Entertainment
-2024,6,67,54,Skin Deep,"$1,809",-60.5%,3,+2,$603,"$8,098",2,Kino Lorber
-2024,6,68,59,The Pianist2024 Re-release,"$1,727",-42.2%,2,+1,$863,"$12,911",3,Rialto Pictures
+2024,6,66,59,The Pianist2024 Re-release,"$2,357",-21.1%,2,+1,"$1,178","$13,541",3,Rialto Pictures
+2024,6,67,56,Weak Layers,"$1,813",-53%,5,-4,$362,"$154,445",6,Greenwich Entertainment
+2024,6,68,54,Skin Deep,"$1,809",-60.5%,3,+2,$603,"$8,098",2,Kino Lorber
 2024,6,69,50,One from the Heart: Reprise2024 Re-release,"$1,657",-75.4%,3,-4,$552,"$42,737",4,Rialto Pictures
 2024,6,70,60,Household Saints2024 Re-release,"$1,212",-43.2%,3,-2,$404,"$24,511",5,Kino Lorber
 2024,6,71,55,The Oath,"$1,133",-75.1%,1,-3,"$1,133","$498,726",10,Freestyle Releasing
@@ -463,7 +463,7 @@ year,week,Rank,LW,Release,Gross,%± LW,Theaters,Change,Average,Total Gross,Weeks
 2024,7,63,73,The Shift,$779,+127.8%,3,+1,$259,"$12,117,375",12,Angel Studios
 2024,7,64,-,"My Sailor, My Love",$509,-,1,-,$509,"$88,593",22,Music Box Films
 2024,7,65,62,Sex-Positive,$483,-85.2%,3,-17,$161,"$3,748",2,Entertainment Squad
-2024,7,66,67,Skin Deep,$464,-74.4%,1,-2,$464,"$8,562",3,Kino Lorber
+2024,7,66,68,Skin Deep,$464,-74.4%,1,-2,$464,"$8,562",3,Kino Lorber
 2024,7,67,64,Fitting In,$445,-85.1%,1,-16,$445,"$87,320",3,Blue Fox Entertainment
 2024,7,68,75,Godard Cinema,$429,+495.8%,1,-,$429,"$23,257",10,Kino Lorber
 2024,7,69,-,Fremont,$28,-,1,-,$28,"$271,343",26,Music Box Films
@@ -537,9 +537,10 @@ year,week,Rank,LW,Release,Gross,%± LW,Theaters,Change,Average,Total Gross,Weeks
 2024,8,68,52,Popular Theory,"$1,893",-73.1%,2,-31,$946,"$37,543",3,Blue Fox Entertainment
 2024,8,69,62,Disco Boy,"$1,568",+30.7%,2,+1,$784,"$9,747",4,Big World Pictures
 2024,8,70,56,Scrambled,$681,-71.5%,6,-5,$113,"$422,555",4,Lionsgate Films
-2024,8,71,64,"My Sailor, My Love",$342,-32.8%,1,-,$342,"$88,935",23,Music Box Films
-2024,8,72,63,The Shift,$291,-62.6%,3,-,$97,"$12,117,666",13,Angel Studios
-2024,8,73,58,The Crime Is Mine,$147,-92.7%,1,-3,$147,"$100,574",10,Music Box Films
+2024,8,71,67,Fitting In,$571,+28.3%,2,+1,$285,"$87,891",4,Blue Fox Entertainment
+2024,8,72,64,"My Sailor, My Love",$342,-32.8%,1,-,$342,"$88,935",23,Music Box Films
+2024,8,73,63,The Shift,$291,-62.6%,3,-,$97,"$12,117,666",13,Angel Studios
+2024,8,74,58,The Crime Is Mine,$147,-92.7%,1,-3,$147,"$100,574",10,Music Box Films
 2024,9,1,-,Dune: Part Two,"$111,027,668",-,"4,071",-,"$27,272","$111,027,668",1,Warner Bros.
 2024,9,2,1,Bob Marley: One Love,"$9,926,423",-43.8%,"3,390",-207,"$2,928","$85,267,503",4,Paramount Pictures
 2024,9,3,3,Ordinary Angels,"$5,401,910",-38%,"3,020",-,"$1,788","$14,113,032",2,-
@@ -589,25 +590,28 @@ year,week,Rank,LW,Release,Gross,%± LW,Theaters,Change,Average,Total Gross,Weeks
 2024,9,47,56,Four Daughters,"$8,969",+62.4%,14,+2,$640,"$120,536",19,Kino Lorber
 2024,9,48,61,They Shot the Piano Player,"$8,367",+139.7%,7,+5,"$1,195","$20,007",2,Sony Pictures Releasing
 2024,9,49,50,The Monk and the Gun,"$7,469",-41.4%,7,-3,"$1,067","$139,803",5,A Contracorriente Films
-2024,9,50,44,Red Right Hand,"$5,548",-78.4%,16,-34,$346,"$31,259",2,Magnolia Pictures
-2024,9,51,57,Ennio,"$5,447",-0.9%,4,+2,"$1,361","$33,407",4,Music Box Films
-2024,9,52,-,Menus-Plaisirs - Les Troisgros,"$4,147",-,7,-,$592,"$140,348",16,Zipporah Films
-2024,9,53,62,The Promised Land,"$3,329",+5.6%,5,-1,$665,"$257,749",5,Magnolia Pictures
-2024,9,54,51,Anselm,"$3,061",-72.2%,5,-6,$612,"$485,057",13,Janus Films
-2024,9,55,60,The Oath,"$2,734",-32.2%,4,+1,$683,"$507,016",13,Freestyle Releasing
-2024,9,56,-,Drift,"$2,586",-,8,-,$323,"$10,077",5,Utopia
-2024,9,57,58,The Invisible Fight,"$2,076",-61.9%,7,-7,$296,"$8,516",2,Kino Lorber
-2024,9,58,52,Isle of Hope,"$2,068",-77.5%,2,-27,"$1,034","$10,217",2,-
-2024,9,59,55,Freud's Last Session,"$1,899",-67.7%,3,-1,$633,"$871,060",11,Sony Pictures Releasing
-2024,9,60,64,Household Saints2024 Re-release,"$1,593",-35.4%,2,-1,$796,"$28,568",8,Kino Lorber
-2024,9,61,59,One from the Heart: Reprise2024 Re-release,$825,-82.3%,1,-3,$825,"$49,775",7,Rialto Pictures
-2024,9,62,-,Revoir Paris,$791,-,1,-,$791,"$52,835",37,Music Box Films
-2024,9,63,53,Golden Years,$615,-92.6%,1,-3,$615,"$8,975",2,Music Box Films
-2024,9,64,72,The Shift,$553,+90%,2,-1,$276,"$12,118,219",14,Angel Studios
-2024,9,65,63,Bushman2024 Re-release,$367,-85.6%,2,-,$183,"$25,330",5,Kino Lorber
-2024,9,66,71,"My Sailor, My Love",$302,-11.7%,1,-,$302,"$89,237",24,Music Box Films
-2024,9,67,65,Inside the Yellow Cocoon Shell,$269,-88.8%,1,-2,$269,"$67,689",7,Kino Lorber
-2024,9,68,73,The Crime Is Mine,$240,+63.3%,1,-,$240,"$100,814",11,Music Box Films
+2024,9,50,42,The Stolen Valley,"$6,427",-79.4%,23,-65,$279,"$37,570",2,Blue Fox Entertainment
+2024,9,51,44,Red Right Hand,"$5,548",-78.4%,16,-34,$346,"$31,259",2,Magnolia Pictures
+2024,9,52,57,Ennio,"$5,447",-0.9%,4,+2,"$1,361","$33,407",4,Music Box Films
+2024,9,53,-,Menus-Plaisirs - Les Troisgros,"$4,147",-,7,-,$592,"$140,348",16,Zipporah Films
+2024,9,54,62,The Promised Land,"$3,329",+5.6%,5,-1,$665,"$257,749",5,Magnolia Pictures
+2024,9,55,51,Anselm,"$3,061",-72.2%,5,-6,$612,"$485,057",13,Janus Films
+2024,9,56,60,The Oath,"$2,734",-32.2%,4,+1,$683,"$507,016",13,Freestyle Releasing
+2024,9,57,-,Drift,"$2,586",-,8,-,$323,"$10,077",5,Utopia
+2024,9,58,58,The Invisible Fight,"$2,076",-61.9%,7,-7,$296,"$8,516",2,Kino Lorber
+2024,9,59,52,Isle of Hope,"$2,068",-77.5%,2,-27,"$1,034","$10,217",2,-
+2024,9,60,55,Freud's Last Session,"$1,899",-67.7%,3,-1,$633,"$871,060",11,Sony Pictures Releasing
+2024,9,61,64,Household Saints2024 Re-release,"$1,593",-35.4%,2,-1,$796,"$28,568",8,Kino Lorber
+2024,9,62,59,One from the Heart: Reprise2024 Re-release,$825,-82.3%,1,-3,$825,"$49,775",7,Rialto Pictures
+2024,9,63,-,Revoir Paris,$791,-,1,-,$791,"$52,835",37,Music Box Films
+2024,9,64,53,Golden Years,$615,-92.6%,1,-3,$615,"$8,975",2,Music Box Films
+2024,9,65,68,Popular Theory,$607,-67.9%,2,-,$303,"$38,150",4,Blue Fox Entertainment
+2024,9,66,73,The Shift,$553,+90%,2,-1,$276,"$12,118,219",14,Angel Studios
+2024,9,67,63,Bushman2024 Re-release,$367,-85.6%,2,-,$183,"$25,330",5,Kino Lorber
+2024,9,68,72,"My Sailor, My Love",$302,-11.7%,1,-,$302,"$89,237",24,Music Box Films
+2024,9,69,65,Inside the Yellow Cocoon Shell,$269,-88.8%,1,-2,$269,"$67,689",7,Kino Lorber
+2024,9,70,74,The Crime Is Mine,$240,+63.3%,1,-,$240,"$100,814",11,Music Box Films
+2024,9,71,71,Fitting In,$70,-87.7%,1,-1,$70,"$87,961",5,Blue Fox Entertainment
 2024,10,1,-,Kung Fu Panda 4,"$77,743,755",-,"4,035",-,"$19,267","$77,743,755",1,Universal Pictures
 2024,10,2,1,Dune: Part Two,"$65,190,249",-41.3%,"4,074",+3,"$16,001","$176,217,917",2,Warner Bros.
 2024,10,3,-,Imaginary,"$13,481,668",-,"3,118",-,"$4,323","$13,481,668",1,Lionsgate Films
@@ -647,34 +651,36 @@ year,week,Rank,LW,Release,Gross,%± LW,Theaters,Change,Average,Total Gross,Weeks
 2024,10,37,33,Origin,"$46,460",-38%,33,-7,"$1,407","$4,689,830",14,-
 2024,10,38,23,Aquaman and the Lost Kingdom,"$44,637",-76.7%,81,-155,$551,"$124,481,226",12,Warner Bros.
 2024,10,39,35,Wish,"$30,656",-48.7%,55,-10,$557,"$63,973,821",17,Walt Disney Studios Motion Pictures
-2024,10,40,59,Freud's Last Session,"$30,298","+1,495.5%",107,+104,$283,"$901,358",12,Sony Pictures Releasing
+2024,10,40,60,Freud's Last Session,"$30,298","+1,495.5%",107,+104,$283,"$901,358",12,Sony Pictures Releasing
 2024,10,41,41,Hundreds of Beavers,"$24,402",+5.7%,13,-,"$1,877","$118,147",7,SRH
 2024,10,42,40,About Dry Grasses,"$22,672",-2%,19,+13,"$1,193","$67,867",3,Sideshow Releasing
 2024,10,43,39,The Teachers' Lounge,"$20,766",-27.8%,27,-28,$769,"$602,912",12,Sony Pictures Releasing
 2024,10,44,37,Nostalghia2024 Re-release,"$18,133",-40.5%,7,-,"$2,590","$113,475",4,Kino Lorber
 2024,10,45,38,The Peasants,"$16,733",-44.5%,27,-3,$619,"$122,191",7,Sony Pictures Classics
 2024,10,46,-,High & Low - John Galliano,"$13,890",-,1,-,"$13,890","$13,890",1,MUBI
-2024,10,47,54,Anselm,"$13,659",+346.2%,10,+5,"$1,365","$498,716",14,Janus Films
+2024,10,47,55,Anselm,"$13,659",+346.2%,10,+5,"$1,365","$498,716",14,Janus Films
 2024,10,48,42,Shayda,"$12,668",-3.7%,7,+5,"$1,809","$29,095",2,Sony Pictures Releasing
 2024,10,49,-,Glitter & Doom,"$6,637",-,2,-,"$3,318","$6,637",2,Music Box Films
 2024,10,50,43,The Sweet East,"$6,362",-51.3%,9,-4,$706,"$315,064",15,Utopia
-2024,10,51,51,Ennio,"$6,129",+12.5%,5,+1,"$1,225","$39,536",5,Music Box Films
+2024,10,51,52,Ennio,"$6,129",+12.5%,5,+1,"$1,225","$39,536",5,Music Box Films
 2024,10,52,49,The Monk and the Gun,"$6,090",-18.5%,8,+1,$761,"$145,893",6,A Contracorriente Films
 2024,10,53,47,Four Daughters,"$5,533",-38.3%,13,-1,$425,"$126,069",20,Kino Lorber
 2024,10,54,46,Amélie2024 Re-release,"$5,178",-47.5%,7,-6,$739,"$483,281",4,Sony Pictures Releasing
 2024,10,55,-,Totem,"$4,211",-,8,-,$526,"$93,336",7,Janus Films
 2024,10,56,48,They Shot the Piano Player,"$4,060",-51.5%,9,+2,$451,"$24,067",3,Sony Pictures Releasing
-2024,10,57,67,Inside the Yellow Cocoon Shell,"$3,192","+1,086.6%",4,+3,$798,"$70,880",8,Kino Lorber
-2024,10,58,57,The Invisible Fight,"$2,402",+15.7%,4,-3,$600,"$10,920",3,Kino Lorber
-2024,10,59,50,Red Right Hand,"$2,065",-62.8%,4,-12,$516,"$33,324",3,Magnolia Pictures
-2024,10,60,55,The Oath,"$1,370",-49.9%,3,-1,$456,"$508,386",14,Freestyle Releasing
+2024,10,57,69,Inside the Yellow Cocoon Shell,"$3,192","+1,086.6%",4,+3,$798,"$70,880",8,Kino Lorber
+2024,10,58,58,The Invisible Fight,"$2,402",+15.7%,4,-3,$600,"$10,920",3,Kino Lorber
+2024,10,59,51,Red Right Hand,"$2,065",-62.8%,4,-12,$516,"$33,324",3,Magnolia Pictures
+2024,10,60,56,The Oath,"$1,370",-49.9%,3,-1,$456,"$508,386",14,Freestyle Releasing
 2024,10,61,45,Amelia's Children,"$1,028",-89.8%,6,-9,$171,"$11,073",2,Magnolia Pictures
-2024,10,62,61,One from the Heart: Reprise2024 Re-release,$999,+21.1%,3,+2,$333,"$50,774",8,Rialto Pictures
-2024,10,63,65,Bushman2024 Re-release,$623,+69.8%,2,-,$311,"$25,953",6,Kino Lorber
-2024,10,64,68,The Crime Is Mine,$459,+91.2%,1,-,$459,"$101,273",12,Music Box Films
-2024,10,65,-,Skin Deep,$269,-,1,-,$269,"$8,831",6,Kino Lorber
-2024,10,66,63,Golden Years,$204,-66.8%,1,-,$204,"$9,179",3,Music Box Films
-2024,10,67,60,Household Saints2024 Re-release,$138,-91.3%,1,-1,$138,"$28,706",9,Kino Lorber
+2024,10,62,62,One from the Heart: Reprise2024 Re-release,$999,+21.1%,3,+2,$333,"$50,774",8,Rialto Pictures
+2024,10,63,67,Bushman2024 Re-release,$623,+69.8%,2,-,$311,"$25,953",6,Kino Lorber
+2024,10,64,50,The Stolen Valley,$568,-91.2%,3,-20,$189,"$38,138",3,Blue Fox Entertainment
+2024,10,65,70,The Crime Is Mine,$459,+91.2%,1,-,$459,"$101,273",12,Music Box Films
+2024,10,66,-,Skin Deep,$269,-,1,-,$269,"$8,831",6,Kino Lorber
+2024,10,67,64,Golden Years,$204,-66.8%,1,-,$204,"$9,179",3,Music Box Films
+2024,10,68,61,Household Saints2024 Re-release,$138,-91.3%,1,-1,$138,"$28,706",9,Kino Lorber
+2024,10,69,71,Fitting In,$34,-51.4%,1,-,$34,"$87,995",6,Blue Fox Entertainment
 2024,11,1,2,Dune: Part Two,"$39,540,626",-39.3%,"3,847",-227,"$10,278","$215,758,543",3,Warner Bros.
 2024,11,2,1,Kung Fu Panda 4,"$38,693,600",-50.2%,"4,067",+32,"$9,514","$116,437,355",2,Universal Pictures
 2024,11,3,-,Arthur the King,"$10,270,255",-,"3,003",-,"$3,419","$10,270,255",1,Lionsgate Films
@@ -684,7 +690,7 @@ year,week,Rank,LW,Release,Gross,%± LW,Theaters,Change,Average,Total Gross,Weeks
 2024,11,7,5,Bob Marley: One Love,"$3,151,597",-45.6%,"2,272",-492,"$1,387","$94,216,599",6,Paramount Pictures
 2024,11,8,-,One Life,"$2,446,392",-,983,-,"$2,488","$2,446,392",1,Bleecker Street Media
 2024,11,9,-,The American Society of Magical Negroes,"$1,764,755",-,"1,147",-,"$1,538","$1,764,755",1,Focus Features
-2024,11,10,-,The Ark and the Darkness,"$1,704,703",-,"1,030",-,"$1,655","$1,704,703",1,Fathom Events
+2024,11,10,-,The Ark and the Darkness,"$1,706,239",-,"1,030",-,"$1,656","$1,706,239",1,Fathom Events
 2024,11,11,6,Ordinary Angels,"$1,401,828",-52.6%,"1,756",-567,$798,"$18,474,749",4,-
 2024,11,12,-,Neon Genesis Evangelion: The End of Evangelion,"$1,237,027",-,570,-,"$2,170","$1,237,027",1,GKIDS
 2024,11,13,7,Migration,"$757,040",-56%,879,-628,$861,"$126,709,685",13,Universal Pictures
@@ -711,32 +717,106 @@ year,week,Rank,LW,Release,Gross,%± LW,Theaters,Change,Average,Total Gross,Weeks
 2024,11,34,44,Nostalghia2024 Re-release,"$20,031",+10.5%,6,-1,"$3,338","$133,505",5,Kino Lorber
 2024,11,35,42,About Dry Grasses,"$18,438",-18.7%,18,-1,"$1,024","$86,272",4,Sideshow Releasing
 2024,11,36,-,Classe Tous Risques2024 Re-release,"$16,168",-,1,-,"$16,168","$16,168",1,Rialto Distribution
-2024,11,37,46,High & Low - John Galliano,"$13,181",-5.1%,4,+3,"$3,295","$30,515",2,MUBI
-2024,11,38,-,Pastor's Kid,"$12,215",-,38,-,$321,"$12,215",1,Atlas Distribution Company
-2024,11,39,-,The Animal Kingdom,"$10,757",-,13,-,$827,"$10,757",1,Magnolia Pictures
-2024,11,40,-,Club Zero,"$9,453",-,1,-,"$9,453","$9,453",1,Film Movement
-2024,11,41,52,The Monk and the Gun,"$9,362",+53.7%,11,+3,$851,"$155,255",7,A Contracorriente Films
-2024,11,42,43,The Teachers' Lounge,"$8,388",-59.6%,12,-15,$699,"$611,300",13,Sony Pictures Releasing
-2024,11,43,48,Shayda,"$7,207",-43.1%,9,+2,$800,"$36,302",3,Sony Pictures Releasing
-2024,11,44,-,Prey,"$5,336",-,5,-,"$1,067","$5,336",1,Vertical Entertainment
-2024,11,45,49,Glitter & Doom,"$5,309",-20%,11,+9,$482,"$11,946",3,Music Box Films
-2024,11,46,47,Anselm,"$5,174",-62.1%,6,-4,$862,"$503,350",15,Janus Films
-2024,11,47,-,Remembering Gene Wilder,"$4,575",-,2,-,"$2,287","$10,432",1,Kino Lorber
-2024,11,48,51,Ennio,"$4,512",-26.4%,4,-1,"$1,128","$44,048",6,Music Box Films
-2024,11,49,36,Stopmotion,"$4,409",-90.7%,11,-72,$400,"$789,226",4,IFC Films
-2024,11,50,56,They Shot the Piano Player,"$4,220",+3.9%,11,+2,$383,"$28,287",4,Sony Pictures Releasing
-2024,11,51,45,The Peasants,"$4,081",-75.6%,10,-17,$408,"$126,272",8,Sony Pictures Classics
-2024,11,52,50,The Sweet East,"$3,953",-37.9%,8,-1,$494,"$319,017",16,Utopia
-2024,11,53,64,The Crime Is Mine,"$3,936",+757.5%,3,+2,"$1,312","$105,209",13,Music Box Films
-2024,11,54,40,Freud's Last Session,"$2,740",-91%,8,-99,$342,"$904,098",13,Sony Pictures Releasing
-2024,11,55,53,Four Daughters,"$2,455",-55.6%,7,-6,$350,"$128,524",21,Kino Lorber
-2024,11,56,59,Red Right Hand,"$2,044",-1%,1,-3,"$2,044","$35,368",4,Magnolia Pictures
-2024,11,57,54,Amélie2024 Re-release,"$2,043",-60.5%,1,-6,"$2,043","$485,324",5,Sony Pictures Releasing
-2024,11,58,63,Bushman2024 Re-release,"$1,331",+113.6%,2,-,$665,"$27,284",7,Kino Lorber
-2024,11,59,60,The Oath,"$1,084",-20.9%,3,-,$361,"$509,470",15,Freestyle Releasing
-2024,11,60,66,Golden Years,"$1,003",+391.7%,3,+2,$334,"$10,182",4,Music Box Films
-2024,11,61,55,Totem,$850,-79.8%,4,-4,$212,"$94,186",8,Janus Films
-2024,11,62,67,Household Saints2024 Re-release,$812,+488.4%,2,+1,$406,"$29,518",10,Kino Lorber
-2024,11,63,57,Inside the Yellow Cocoon Shell,$673,-78.9%,2,-2,$336,"$71,553",9,Kino Lorber
-2024,11,64,58,The Invisible Fight,$559,-76.7%,2,-2,$279,"$11,479",4,Kino Lorber
-2024,11,65,65,Skin Deep,$83,-69.1%,1,-,$83,"$8,914",7,Kino Lorber
+2024,11,37,-,Uproar,"$13,562",-,33,-,$410,"$13,562",1,Blue Fox Entertainment
+2024,11,38,46,High & Low - John Galliano,"$13,181",-5.1%,4,+3,"$3,295","$30,515",2,MUBI
+2024,11,39,-,Pastor's Kid,"$12,215",-,38,-,$321,"$12,215",1,Atlas Distribution Company
+2024,11,40,-,The Animal Kingdom,"$10,757",-,13,-,$827,"$10,757",1,Magnolia Pictures
+2024,11,41,-,Club Zero,"$9,453",-,1,-,"$9,453","$9,453",1,Film Movement
+2024,11,42,52,The Monk and the Gun,"$9,362",+53.7%,11,+3,$851,"$155,255",7,A Contracorriente Films
+2024,11,43,43,The Teachers' Lounge,"$8,388",-59.6%,12,-15,$699,"$611,300",13,Sony Pictures Releasing
+2024,11,44,48,Shayda,"$7,207",-43.1%,9,+2,$800,"$36,302",3,Sony Pictures Releasing
+2024,11,45,-,Prey,"$5,336",-,5,-,"$1,067","$5,336",1,Vertical Entertainment
+2024,11,46,49,Glitter & Doom,"$5,309",-20%,11,+9,$482,"$11,946",3,Music Box Films
+2024,11,47,47,Anselm,"$5,174",-62.1%,6,-4,$862,"$503,350",15,Janus Films
+2024,11,48,-,Remembering Gene Wilder,"$4,575",-,2,-,"$2,287","$10,432",1,Kino Lorber
+2024,11,49,51,Ennio,"$4,512",-26.4%,4,-1,"$1,128","$44,048",6,Music Box Films
+2024,11,50,36,Stopmotion,"$4,409",-90.7%,11,-72,$400,"$789,226",4,IFC Films
+2024,11,51,56,They Shot the Piano Player,"$4,220",+3.9%,11,+2,$383,"$28,287",4,Sony Pictures Releasing
+2024,11,52,45,The Peasants,"$4,081",-75.6%,10,-17,$408,"$126,272",8,Sony Pictures Classics
+2024,11,53,50,The Sweet East,"$3,953",-37.9%,8,-1,$494,"$319,017",16,Utopia
+2024,11,54,65,The Crime Is Mine,"$3,936",+757.5%,3,+2,"$1,312","$105,209",13,Music Box Films
+2024,11,55,40,Freud's Last Session,"$2,740",-91%,8,-99,$342,"$904,098",13,Sony Pictures Releasing
+2024,11,56,53,Four Daughters,"$2,455",-55.6%,7,-6,$350,"$128,524",21,Kino Lorber
+2024,11,57,59,Red Right Hand,"$2,044",-1%,1,-3,"$2,044","$35,368",4,Magnolia Pictures
+2024,11,58,54,Amélie2024 Re-release,"$2,043",-60.5%,1,-6,"$2,043","$485,324",5,Sony Pictures Releasing
+2024,11,59,63,Bushman2024 Re-release,"$1,331",+113.6%,2,-,$665,"$27,284",7,Kino Lorber
+2024,11,60,60,The Oath,"$1,084",-20.9%,3,-,$361,"$509,470",15,Freestyle Releasing
+2024,11,61,67,Golden Years,"$1,003",+391.7%,3,+2,$334,"$10,182",4,Music Box Films
+2024,11,62,-,On the Adamant,$872,-,2,-,$436,"$12,665",1,Kino Lorber
+2024,11,63,55,Totem,$850,-79.8%,4,-4,$212,"$94,186",8,Janus Films
+2024,11,64,68,Household Saints2024 Re-release,$812,+488.4%,2,+1,$406,"$29,518",10,Kino Lorber
+2024,11,65,64,The Stolen Valley,$771,+35.7%,3,-,$257,"$38,909",4,Blue Fox Entertainment
+2024,11,66,57,Inside the Yellow Cocoon Shell,$673,-78.9%,2,-2,$336,"$71,553",9,Kino Lorber
+2024,11,67,-,Popular Theory,$631,-,1,-,$631,"$38,781",6,Blue Fox Entertainment
+2024,11,68,58,The Invisible Fight,$559,-76.7%,2,-2,$279,"$11,479",4,Kino Lorber
+2024,11,69,66,Skin Deep,$83,-69.1%,1,-,$83,"$8,914",7,Kino Lorber
+2024,12,1,-,Ghostbusters: Frozen Empire,"$57,701,133",-,"4,345",-,"$13,279","$57,701,133",1,Sony Pictures Releasing
+2024,12,2,1,Dune: Part Two,"$25,531,484",-35.4%,"3,437",-410,"$7,428","$241,290,027",4,Warner Bros.
+2024,12,3,2,Kung Fu Panda 4,"$25,014,700",-35.4%,"3,805",-262,"$6,574","$141,452,055",3,Universal Pictures
+2024,12,4,-,Immaculate,"$7,863,191",-,"2,354",-,"$3,340","$7,863,191",1,-
+2024,12,5,3,Arthur the King,"$6,396,142",-37.7%,"3,003",-,"$2,129","$16,666,397",2,Lionsgate Films
+2024,12,6,-,Late Night with the Devil,"$4,088,758",-,"1,034",-,"$3,954","$4,088,758",1,IFC Films
+2024,12,7,4,Imaginary,"$4,010,256",-45.4%,"2,513",-605,"$1,595","$24,835,054",3,Lionsgate Films
+2024,12,8,6,Love Lies Bleeding,"$2,452,976",-35.7%,"1,828",+466,"$1,341","$6,546,794",3,A24
+2024,12,9,5,Cabrini,"$2,369,785",-47.9%,"1,765","-1,085","$1,342","$17,104,388",3,Angel Studios
+2024,12,10,7,Bob Marley: One Love,"$1,632,839",-48.2%,"1,266","-1,006","$1,289","$95,849,438",7,Paramount Pictures
+2024,12,11,8,One Life,"$1,600,160",-34.6%,"1,009",+26,"$1,585","$4,046,552",2,Bleecker Street Media
+2024,12,12,-,Luca,"$895,871",-,"1,390",-,$644,"$895,871",145,Walt Disney Studios Motion Pictures
+2024,12,13,18,Problemista,"$689,857",+78.3%,237,+174,"$2,910","$1,532,756",57,A24
+2024,12,14,9,The American Society of Magical Negroes,"$630,525",-64.3%,"1,153",+6,$546,"$2,395,280",2,Focus Features
+2024,12,15,-,Winnie-the-Pooh: Blood and Honey 2,"$533,144",-,"1,489",-,$358,"$533,144",1,Fathom Events
+2024,12,16,11,Ordinary Angels,"$511,524",-63.5%,705,"-1,051",$725,"$18,986,273",5,-
+2024,12,17,-,The Chosen: S4 Episodes 1-3,"$493,653",-,"1,037",-,$476,"$14,409,169",9,Fathom Events
+2024,12,18,-,You Can Call Me Bill,"$472,742",-,285,-,"$1,658","$472,742",1,N/A
+2024,12,19,27,The Boy and the Heron,"$412,713",+499%,440,+379,$937,"$46,610,768",16,GKIDS
+2024,12,20,13,Migration,"$340,885",-55%,401,-478,$850,"$127,050,570",14,Universal Pictures
+2024,12,21,20,Perfect Days,"$186,582",-24%,77,-67,"$2,423","$3,307,435",8,-
+2024,12,22,16,Yolo,"$178,259",-59.6%,71,-129,"$2,510","$1,818,821",3,Sony Pictures Releasing
+2024,12,23,14,Madame Web,"$100,968",-81.3%,172,-886,$587,"$43,771,800",7,Columbia Pictures
+2024,12,24,24,Wonka,"$99,814",-55.8%,163,-219,$612,"$218,332,201",15,Warner Bros.
+2024,12,25,23,The Zone of Interest,"$96,393",-58.1%,84,-128,"$1,147","$8,576,457",16,A24
+2024,12,26,22,The Beekeeper,"$93,950",-61.2%,135,-172,$695,"$66,220,535",11,Metro-Goldwyn-Mayer (MGM)
+2024,12,27,30,The Taste of Things,"$90,092",+72.5%,70,-5,"$1,287","$2,604,716",7,IFC Films
+2024,12,28,21,Demon Slayer: Kimetsu No Yaiba - To the Hashira Training,"$70,128",-71.2%,73,-184,$960,"$17,623,423",5,Sony Pictures Releasing
+2024,12,29,12,Neon Genesis Evangelion: The End of Evangelion,"$65,273",-94.7%,77,-493,$847,"$1,302,300",2,GKIDS
+2024,12,30,19,Poor Things,"$62,049",-81.6%,55,-785,"$1,128","$34,553,225",16,Searchlight Pictures
+2024,12,31,28,Anyone But You,"$53,941",-4.7%,45,-30,"$1,198","$88,260,659",14,Columbia Pictures
+2024,12,32,17,Snack Shack,"$50,036",-87.7%,145,-292,$345,"$455,708",2,Republic Pictures (II)
+2024,12,33,-,Carol Doda Topless at the Condor,"$46,811",-,4,-,"$11,702","$46,811",1,Picturehouse
+2024,12,34,10,The Ark and the Darkness,"$32,021",-98.1%,76,-954,$421,"$1,738,260",2,Fathom Events
+2024,12,35,31,Hundreds of Beavers,"$24,170",-31.4%,13,-6,"$1,859","$177,470",9,SRH
+2024,12,36,52,The Peasants,"$23,450",+474.6%,251,+241,$93,"$149,722",9,Sony Pictures Classics
+2024,12,37,-,Femme,"$21,765",-,1,-,"$21,765","$21,765",1,Utopia
+2024,12,38,48,Remembering Gene Wilder,"$21,740",+375.2%,8,+6,"$2,717","$32,172",2,Kino Lorber
+2024,12,39,34,Nostalghia2024 Re-release,"$16,962",-15.3%,5,-1,"$3,392","$150,467",6,Kino Lorber
+2024,12,40,26,The Chosen: S4 Episodes 7-8,"$16,327",-88.1%,57,-230,$286,"$7,074,637",5,Fathom Events
+2024,12,41,35,About Dry Grasses,"$14,515",-21.3%,18,-,$806,"$100,787",5,Sideshow Releasing
+2024,12,42,44,Shayda,"$11,284",+56.6%,12,+3,$940,"$47,586",4,Sony Pictures Releasing
+2024,12,43,-,Limbo,"$10,694",-,2,-,"$5,347","$10,694",1,Music Box Films
+2024,12,44,29,Accidental Texan,"$10,407",-81.5%,16,-94,$650,"$270,755",3,Roadside Attractions
+2024,12,45,-,Free Time,"$8,463",-,1,-,"$8,463","$8,463",1,-
+2024,12,46,-,Do Not Expect Too Much from the End of the World,"$8,063",-,1,-,"$8,063","$21,689",1,MUBI
+2024,12,47,43,The Teachers' Lounge,"$7,201",-14.2%,9,-3,$800,"$618,503",14,Sony Pictures Releasing
+2024,12,48,36,Classe Tous Risques2024 Re-release,"$6,568",-59.4%,1,-,"$6,568","$22,736",2,Rialto Distribution
+2024,12,49,32,2024 Oscar Nominated Short Films: Documentary,"$6,411",-75.1%,4,-17,"$1,602","$3,162,293",6,ShortsTV
+2024,12,50,33,Land of Bad,"$6,142",-75.2%,9,-32,$682,"$4,615,953",6,The Avenue Entertainment
+2024,12,51,38,High & Low - John Galliano,"$5,996",-54.5%,4,-,"$1,499","$36,511",3,MUBI
+2024,12,52,63,Totem,"$4,829",+468.1%,4,-,"$1,207","$99,015",9,Janus Films
+2024,12,53,56,Four Daughters,"$4,354",+77.4%,8,+1,$544,"$132,878",22,Kino Lorber
+2024,12,54,37,Uproar,"$3,577",-73.6%,4,-29,$894,"$17,139",2,Blue Fox Entertainment
+2024,12,55,49,Ennio,"$3,112",-31%,3,-1,"$1,037","$47,160",7,Music Box Films
+2024,12,56,-,The Heart Stays,"$2,810",-,5,-,$562,"$18,310",1,Indican Pictures
+2024,12,57,55,Freud's Last Session,"$2,185",-20.3%,3,-5,$728,"$906,283",14,Sony Pictures Releasing
+2024,12,58,46,Glitter & Doom,"$1,919",-63.9%,6,-5,$319,"$13,865",4,Music Box Films
+2024,12,59,51,They Shot the Piano Player,"$1,698",-59.8%,5,-6,$339,"$30,812",5,Sony Pictures Releasing
+2024,12,60,53,The Sweet East,"$1,625",-58.9%,3,-5,$541,"$320,642",17,Utopia
+2024,12,61,66,Inside the Yellow Cocoon Shell,"$1,074",+59.6%,3,+1,$358,"$72,628",10,Kino Lorber
+2024,12,62,40,The Animal Kingdom,"$1,010",-90.6%,1,-12,"$1,010","$11,767",2,Magnolia Pictures
+2024,12,63,61,Golden Years,$817,-18.5%,1,-2,$817,"$10,999",5,Music Box Films
+2024,12,64,64,Household Saints2024 Re-release,$807,-0.6%,3,+1,$269,"$30,325",11,Kino Lorber
+2024,12,65,42,The Monk and the Gun,$675,-92.8%,6,-5,$112,"$155,930",8,A Contracorriente Films
+2024,12,66,62,On the Adamant,$598,-31.4%,2,-,$299,"$13,263",2,Kino Lorber
+2024,12,67,54,The Crime Is Mine,$573,-85.4%,1,-2,$573,"$105,782",14,Music Box Films
+2024,12,68,58,Amélie2024 Re-release,$567,-72.2%,2,+1,$283,"$485,891",6,Sony Pictures Releasing
+2024,12,69,-,Other People's Children,$392,-,1,-,$392,"$86,747",49,Music Box Films
+2024,12,70,59,Bushman2024 Re-release,$345,-74.1%,1,-1,$345,"$27,628",8,Kino Lorber

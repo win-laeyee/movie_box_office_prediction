@@ -8,6 +8,10 @@ from google.cloud.storage import Client, transfer_manager
 
 def upload_blob(bucket_name, source_file_name, destination_blob_name):
     """Uploads a file to the Google Cloud Storage bucket."""
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    json_path = os.path.join(script_dir, "is3107-418809-62c002a9f1f7.json")
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
+    
     # Initialize a client
     storage_client = storage.Client()
 
@@ -32,6 +36,9 @@ def upload_many_blobs_with_transfer_manager(bucket_name, filenames, source_direc
     file (and other aspects of individual blob metadata), use
     transfer_manager.upload_many() instead.
     """
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    json_path = os.path.join(script_dir, "is3107-418809-62c002a9f1f7.json")
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
 
     storage_client = Client()
     bucket = storage_client.bucket(bucket_name)
@@ -49,10 +56,30 @@ def upload_many_blobs_with_transfer_manager(bucket_name, filenames, source_direc
             print("Uploaded {} to {}.".format(name, bucket.name))
 
 
+def delete_many_blobs(bucket_name, blob_names):
+    """Deletes multiple blobs from the bucket."""
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    json_path = os.path.join(script_dir, "is3107-418809-62c002a9f1f7.json")
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
+
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(bucket_name)
+
+    for blob_name in blob_names:
+        blob = bucket.blob(blob_name)
+        if blob.exists():
+            blob.delete()
+            print("Blob {} deleted.".format(blob_name))
+        else:
+            print("Blob {} does not exist.".format(blob_name))
+
+
 #initialise the gcs (not updating)
 if __name__ == "__main__":
     # Set the path to your service account key file
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "googlecloud/is3107-418809-62c002a9f1f7.json"
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    json_path = os.path.join(script_dir, "is3107-418809-62c002a9f1f7.json")
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
 
     bucket_name = "movies_tmdb"
     storage_client = storage.Client()
@@ -61,24 +88,25 @@ if __name__ == "__main__":
 
     try:
         #raw tmdb file (joanne)
-        str_directory = './raw_data/tmdb_rawdata'
+        str_directory = './historical_data/raw_historical_data/tmdb'
         directory = Path(str_directory)
         filenames = list([file.name for file in directory.glob('*.ndjson')])
-        filenames_to_upload = [filename for filename in filenames if filename not in blob_names]
-        print(f"{filenames_to_upload=}")
-        upload_many_blobs_with_transfer_manager(bucket_name, filenames=filenames_to_upload, source_directory=str_directory)
-    except Exception:
+        delete_many_blobs(bucket_name, filenames)
+        print(f"{filenames=}")
+        upload_many_blobs_with_transfer_manager(bucket_name, filenames=filenames, source_directory=str_directory)
+    except Exception as e:
         print("Error in uploading TMDB raw data to cloud storage")
+        print(f"Error details: {e}")
 
-    try:
-        #boxoffice mojo raw (shantia)
-        str_directory = './raw_data/boxofficemojo_rawdata'
-        directory = Path(str_directory)
-        filenames = list([file.name for file in directory.glob('*.csv')])
-        filenames_to_upload = [filename for filename in filenames if filename not in blob_names]
-        upload_many_blobs_with_transfer_manager(bucket_name, filenames=filenames_to_upload, source_directory=str_directory)
-    except Exception:
-        print("Error in uploading boxofficemojo raw data to cloud storage")
+    # try:
+    #     #boxoffice mojo raw (shantia)
+    #     str_directory = './historical_data/raw_historical_data/boxofficemojo'
+    #     directory = Path(str_directory)
+    #     filenames = list([file.name for file in directory.glob('*.csv')])
+    #     delete_many_blobs(bucket_name, filenames)
+    #     upload_many_blobs_with_transfer_manager(bucket_name, filenames=filenames, source_directory=str_directory)
+    # except Exception:
+    #     print("Error in uploading boxofficemojo raw data to cloud storage")
 
 
 
