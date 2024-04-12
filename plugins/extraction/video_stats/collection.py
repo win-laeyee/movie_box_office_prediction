@@ -1,22 +1,26 @@
 import os
+import time
 import pandas as pd
 import numpy as np
 import requests
+from pathlib import Path
 from tqdm import tqdm
+from datetime import datetime
 from dotenv import load_dotenv
 from googlecloud.read_data_gcs import read_blob, list_blobs
+from googlecloud.upload_initial_data_gcs import upload_many_blobs_with_transfer_manager
 from googleapiclient.discovery import build
 
 
-def get_video_keys_gcs() -> pd.DataFrame:
+def get_video_keys_gcs(start_date: datetime, end_date: datetime) -> pd.DataFrame:
     """
-    Retrieves the video collection IDs and details from files stored in Google Cloud Storage (GCS).
+    Retrieves the video collection IDs and details from files stored in Google Cloud Storage (GCS), based on start and end dates.
 
     Returns:
         pd.DataFrame: Pandas DataFrame containing the video keys (and details) needed to call YouTube/Vimeo APIs.
     """
     bucket_name = "movies_tmdb"
-    filenames = list_blobs("movies_tmdb", prefix="raw_movie_details")
+    filenames = list_blobs("movies_tmdb", prefix=f"raw_movie_details_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}")
     df = pd.DataFrame()
     for filename in tqdm(filenames):
         file_content = read_blob(bucket_name, filename)[["id", "videos"]].rename(columns={"id": "movie_id"})
@@ -68,29 +72,33 @@ def get_youtube_video_stats(chunk: list) -> list:
     )
     response = request.execute()
     print(response)
-    return [item for item in response["items"]]
 
-def get_vimeo_video_stats(chunk: list) -> list:
+    results = [item for item in response["items"]]
+    return results
+
+def get_vimeo_video_stats(keys: list) -> list:
     """
     Retrieves video statistics from Vimeo for one chunk of keys at a time.
 
     Args:
-        chunks (list): A list of series of video keys.
+        keys (list): A list of video keys.
 
     Returns:
-        response (list): List containing Vimeo video statistics data as records.
+        results (list): List containing Vimeo video statistics data as records.
     """
     load_dotenv()
     VIMEO_API_TOKEN = os.getenv("VIMEO_API_TOKEN")
-    print(VIMEO_API_TOKEN)
+
     results = []
-    headers = {
-        'Authorization': f'Bearer {VIMEO_API_TOKEN}',
-        'Content-Type': 'application/json'
-    }
-    
-    for video_key in chunk:
+    RATE_LIMIT = 50 # Vimeo API rate limit, as of Apr 2024
+    rate_limit_count = 0
+
+    for video_key in tqdm(keys):
         api_url = f'https://api.vimeo.com/videos/{video_key}?fields=stats,metadata'
+        headers = {
+            'Authorization': f'Bearer {VIMEO_API_TOKEN}',
+            'Content-Type': 'application/json'
+        }
         response = requests.get(api_url, headers=headers)
         record = {"video_key_id": video_key}
 
@@ -104,37 +112,46 @@ def get_vimeo_video_stats(chunk: list) -> list:
             print(f"Failed to retrieve video data. Status code: {response.status_code}")
 
         results.append(record)
+        rate_limit_count += 1
+
+        if rate_limit_count >= RATE_LIMIT: # every X counts scraped, sleep for 45 seconds
+            time.sleep(45)
+            rate_limit_count = 0
 
     return results
 
-def get_clean_video_stats(save_file_path: str, return_df=False):
+def extract_raw_video_stats(raw_file_dir: str, start_date: datetime, end_date: datetime):
     """
     Cleans the raw movie details from ndjson files and saves the cleaned results after extracting video details into a CSV file.
 
     Args:
-        raw_file_path (str): The file path of the raw collection details JSON file.
-        save_file_path (str): The directory path where the cleaned CSV file will be saved.
+        raw_file_dir (str): The absolute directory path where the raw collection details JSON file will be saved.
+        start_date (datetime): Datetime object of start date from which to filter.
+        end_date (datetime): Datetime object of end date to which to filter.
 
     Returns:
-        filepath(str) or dataframe (pd.DataFrame)
+        None
     """
-
-    video_key_df = get_video_keys_gcs()
+    # get video keys from YouTube and Vimeo APIs
+    video_key_df = get_video_keys_gcs(start_date, end_date)
     
     # filter for different video sites
     vimeo_video_keys = video_key_df[video_key_df["site"] == "Vimeo"]["key"]
     youtube_video_keys = video_key_df[video_key_df["site"] == "YouTube"]["key"]
     
-    # chunk data
-    vimeo_chunks_list = chunks(vimeo_video_keys)
+    # fetch vimeo data
+    vimeo_results = get_vimeo_video_stats(vimeo_video_keys)
+    vimeo_df = pd.DataFrame(vimeo_results)
+    vimeo_df.to_csv(os.path.join(raw_file_dir, f"raw_vimeo_video_stats_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}.csv"), index=False)
+
+    # fetch youtube data
     youtube_chunks_list = chunks(youtube_video_keys)
+    youtube_results = []
+    for chunk in youtube_chunks_list:
+        youtube_results.extend(get_youtube_video_stats(chunk))
+    youtube_df = pd.DataFrame(youtube_results)
+    youtube_df.to_csv(os.path.join(raw_file_dir, f"raw_youtube_video_stats_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}.csv"), index=False)
 
-    pass
-    
-
-
-if __name__ == "__main__":
-    video_key_df = get_video_keys_gcs()
-    vimeo_video_keys = video_key_df[video_key_df["site"] == "Vimeo"]["key"]
-    vimeo_chunks_list = chunks(vimeo_video_keys)
-    results = []
+    # upload to gcs
+    filenames = list([file.name for file in Path(raw_file_dir).glob(f"raw_*_video_stats_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}.csv")])
+    upload_many_blobs_with_transfer_manager("movies_tmdb", filenames=filenames, source_directory=raw_file_dir)

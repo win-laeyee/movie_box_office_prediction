@@ -3,19 +3,27 @@ import pandas as pd
 import numpy as np
 import logging
 from tqdm import tqdm
+from datetime import datetime
 from googlecloud.read_data_gcs import read_blob, list_blobs
 from googleapiclient.discovery import build
 
 
-def get_raw_video_details_gcs() -> pd.DataFrame:
+def get_raw_video_details_gcs(start_date: datetime, end_date: datetime) -> pd.DataFrame:
     """
     Retrieves the raw video details from raw movie details data stored in Google Cloud Storage (GCS).
+
+    Args:
+        start_date (datetime, optional): Datetime object of start date from which to filter.
+        end_date (datetime, optional): Datetime object of end date to which to filter.
 
     Returns:
         pd.DataFrame: Pandas DataFrame containing the video keys and additional video details.
     """
     bucket_name = "movies_tmdb"
-    filenames = list_blobs(bucket_name, prefix="raw_movie_details")
+    prefix = "raw_movie_details"
+    if start_date and end_date:
+        prefix = prefix + f"_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}"
+    filenames = list_blobs(bucket_name, prefix=prefix)
     df = pd.DataFrame()
     for filename in tqdm(filenames):
         file_content = read_blob(bucket_name, filename)[["id", "videos"]].rename(columns={"id": "movie_id"})
@@ -26,9 +34,13 @@ def get_raw_video_details_gcs() -> pd.DataFrame:
         df = pd.concat([df, file_content], axis=0)
     return df.drop_duplicates()
 
-def get_raw_video_statistics_gcs() -> pd.DataFrame:
+def get_raw_video_statistics_gcs(start_date: datetime, end_date: datetime) -> pd.DataFrame:
     """
     Retrieves the raw video statistics data stored in Google Cloud Storage (GCS).
+
+    Args:
+        start_date (datetime, optional): Datetime object of start date from which to filter.
+        end_date (datetime, optional): Datetime object of end date to which to filter.
 
     Returns:
         pd.DataFrame: Pandas DataFrame containing the video keys and statistics.
@@ -38,7 +50,10 @@ def get_raw_video_statistics_gcs() -> pd.DataFrame:
     df = pd.DataFrame()
     for site in sites:
         logging.info(f"Getting raw data for {site}...")
-        filenames = list_blobs(bucket_name, prefix=f"raw_{site.lower()}_video_stats")
+        prefix = f"raw_{site.lower()}_video_stats"
+        if start_date and end_date:
+            prefix = prefix + f"_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}"
+        filenames = list_blobs(bucket_name, prefix=prefix)
         for filename in tqdm(filenames):
             file_content = read_blob(bucket_name, filename)
             if site == "YouTube": # Extra transformations needed for YouTube statistics
@@ -47,19 +62,21 @@ def get_raw_video_statistics_gcs() -> pd.DataFrame:
             df = pd.concat([df, file_content], axis=0)
     return df.drop_duplicates()
 
-def clean_raw_video_statistics(save_file_path: str, return_df=False):
+def clean_raw_video_statistics(save_file_path: str, start_date: datetime = None, end_date: datetime = None, return_df=False):
     """
     Cleans the raw movie details and statistics from CSV files and saves the cleaned results to a CSV file.
 
     Args:
-        raw_file_path (str): The file path of the raw collection details CSV file(s).
-        save_file_path  (str): The directory path where the cleaned CSV file will be saved.
+        save_file_path (str): The directory path where the cleaned CSV file will be saved.
+        start_date (datetime, optional): Datetime object of start date from which to filter.
+        end_date (datetime, optional): Datetime object of end date to which to filter.
+        return_df (boolean, default False): If True, return dataframe. Else, save to `save_file_path`. 
 
     Returns:
         filepath (str) or dataframe (pd.DataFrame)
     """
-    video_details_df = get_raw_video_details_gcs()
-    video_statistics_df = get_raw_video_statistics_gcs()
+    video_details_df = get_raw_video_details_gcs(start_date, end_date)
+    video_statistics_df = get_raw_video_statistics_gcs(start_date, end_date)
 
     combined_df = video_details_df[["movie_id", "key", "site", "type", "published_at"]].set_index("key").join(video_statistics_df.set_index("video_key_id"), how="inner")
     combined_df.reset_index(drop=True, inplace=True)
