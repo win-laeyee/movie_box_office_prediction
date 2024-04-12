@@ -73,7 +73,6 @@ def upload_csv_to_table(project_id, dataset_id, table_id, csv_file_path, mode):
     elif mode == "empty":
         job_config.write_disposition = bigquery.WriteDisposition.WRITE_EMPTY  # Write only when tables empty - ensure no any overwrite
 
-    
     df = pd.read_csv(csv_file_path)
     df['insertion_datetime'] = datetime.now() #create new column if not exist and save to same file
     df.to_csv(csv_file_path, index=False)
