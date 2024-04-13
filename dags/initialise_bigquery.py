@@ -4,6 +4,7 @@ from googlecloud.create_table_bigquery import delete_all_tables, create_dataset_
 from googlecloud.upload_initial_data_bigquery import upload_csv_to_table, upload_df_to_table #type:ignore
 from extraction.video_stats.clean_per_erd import clean_raw_video_statistics #type:ignore
 from extraction.tmdb_collection.collection import clean_raw_collections_details #type:ignore
+from extraction.tmdb_movie.movie import clean_raw_movie_details #type:ignore
 from extraction.boxoffice_api.boxoffice_clean_per_erd import get_clean_weekly_domestic_performance #type:ignore
 from datetime import datetime, timedelta
 
@@ -21,7 +22,18 @@ def setup_bigquery_task():
     create_all_tables(project_id, dataset_id)
 
 def etl_tmdb_movie_task():
-    pass
+    """
+    Extracts, transforms, and loads TMDB movie data into a BigQuery table.
+
+    This function performs the following steps:
+    1. Calls the `clean_raw_movie_details` function to clean and transform the raw data retrieved from gcs.
+    2. Calls the `upload_df_to_table` function to upload the cleaned data to the BigQuery movie table.
+    """
+    project_id = "is3107-418809"
+    dataset_id = "movie_dataset"
+    table_id = "movie"
+    df = clean_raw_collections_details('', return_df = True)
+    upload_df_to_table(project_id, dataset_id, table_id, df, mode="truncate")
 
 def etl_tmdb_person_task():
     pass
