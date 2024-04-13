@@ -22,9 +22,10 @@ def get_raw_tmdb_movie_details_gcs():
         df = pd.concat([df, file_content], axis=0)
     return df
 
+
 def clean_raw_movie_details(save_file_path:str, return_df=False):
     """
-    Cleans the raw movie details from ndjson file and saves the cleaned results to a CSV file or return a data frame.
+    Cleans the raw collection details from ndjson file and saves the cleaned results to a CSV file.
 
     Args:
         raw_file_path (str): The file path of the raw collection details NDJSON file.
@@ -36,12 +37,12 @@ def clean_raw_movie_details(save_file_path:str, return_df=False):
     
     movie_results = get_raw_tmdb_movie_details_gcs() #How do I only get new data in google cloud storage
     
-    selected_columns = ['budget', 'imdb_id', 'original_language', 'original_title', 'release_date',
+    selected_columns = ['budget', 'imdb_id', 'original_language', 'release_date',
                     'revenue', 'runtime', 'status']
     
     final_data = {
     'movie_id': [],
-    'original_title': [],
+    'title': [],
     'original_language': [],
     'imdb_id': [],
     'revenue': [],
@@ -87,7 +88,8 @@ def clean_raw_movie_details(save_file_path:str, return_df=False):
         if is_released_in_cinema == 0:
             continue #skip movies that were not released in cinemas/theatre
             
-        final_data['movie_id'].append(row['id'])
+        final_data['movie_id'].append(int(row['id']))
+        final_data['title'].append(row['original_title'])
         final_data['is_adult'].append(0 if row['adult'] == False else 1)
         final_data['tmdb_popularity'].append(row['popularity'])
         final_data['tmdb_vote_average'].append(row['vote_average'])
@@ -97,7 +99,7 @@ def clean_raw_movie_details(save_file_path:str, return_df=False):
             final_data[col].append(row[col])
         
         # Collection
-        final_data['collection_id'].append(None if pd.isna(row['belongs_to_collection']) else row['belongs_to_collection']['id'])
+        final_data['collection_id'].append(None if pd.isna(row['belongs_to_collection']) else int(row['belongs_to_collection']['id']))
         
         # Production Companies Count
         final_data['production_companies_count'].append(len((row['production_companies'])))
@@ -110,10 +112,10 @@ def clean_raw_movie_details(save_file_path:str, return_df=False):
         num_of_cast = len(row['credits']['cast'])
         credit_cast = (row['credits']['cast'])
         if num_of_cast >= 2:
-            final_data['cast1_id'].append(str(credit_cast[0]['id']))
-            final_data['cast2_id'].append(str(credit_cast[1]['id']))
+            final_data['cast1_id'].append(int(credit_cast[0]['id']))
+            final_data['cast2_id'].append(int(credit_cast[1]['id']))
         elif num_of_cast == 1:
-            final_data['cast1_id'].append(str(credit_cast[0]['id']))                
+            final_data['cast1_id'].append(int(credit_cast[0]['id']))                
             final_data['cast2_id'].append(None)
         else:                   
             final_data['cast1_id'].append(None)
@@ -124,12 +126,12 @@ def clean_raw_movie_details(save_file_path:str, return_df=False):
         producer_id = None
         for job in (row['credits']['crew']):
             if job['job'] == 'Director':
-                director_id = str(job['id'])
+                director_id = (job['id'])
             elif job['job'] == 'Producer':
-                producer_id = str(job['id'])
+                producer_id = (job['id'])
 
-        final_data['director_id'].append(director_id)
-        final_data['producer_id'].append(producer_id)
+        final_data['director_id'].append(int(director_id))
+        final_data['producer_id'].append(int(producer_id))
                 
         # Videos key_id
         video_key_id = []
@@ -173,6 +175,11 @@ def clean_raw_movie_details(save_file_path:str, return_df=False):
     # Remove rows that don't have revenue information
     final_df = final_df[final_df['revenue'] > 0]
     
+    # Rearrange columns
+    final_df = final_df[['movie_id', 'revenue', 'budget', 'imdb_id', 'title', 'original_language', 'release_date',
+                        'runtime', 'status', 'production_companies_count', 'is_adult', 'is_adaptation',
+                         'collection_id', 'cast1_id', 'cast2_id', 'director_id', 'producer_id', 'tmdb_popularity',
+                         'tmdb_vote_average', 'tmdb_vote_count', 'video_key_id']]
     if not return_df:
         folder_path = save_file_path
         if not os.path.exists(folder_path):
