@@ -1,11 +1,12 @@
 from google.cloud import bigquery
 import os
+import datetime
 
-# credentials_filename = "is3107-418809-62c002a9f1f7.json"
-# dataset_id = "movie_dataset"
+credentials_filename = "is3107-418809-62c002a9f1f7.json"
+dataset_id = "movie_dataset"
 
-credentials_filename = "bigquery_credentials.json"
-dataset_id = "firm-catalyst-417613.IS3107"
+# credentials_filename = "bigquery_credentials.json"
+# dataset_id = "firm-catalyst-417613.IS3107"
 
 keyfile_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../secrets", credentials_filename))
 client = bigquery.Client.from_service_account_json(keyfile_path)
@@ -22,22 +23,23 @@ def query_bigquery_table(table_name):
         return None
 
 def query_movie_details():
-    return query_bigquery_table("movie_details")
+    # return query_bigquery_table("movie_details")
+    return query_bigquery_table("movie")
 
 def query_video_stats():
-    return query_bigquery_table("final_clean_video_stats")
+    # return query_bigquery_table("final_clean_video_stats")
+    return query_bigquery_table("video_stats")
 
 def query_collection_info():
-    return query_bigquery_table("collection_info")
-    # return query_bigquery_table("collection")
+    # return query_bigquery_table("collection_info")
+    return query_bigquery_table("collection")
 
 def query_weekly_domestic_performance():
     return query_bigquery_table("weekly_domestic_performance")
 
 def query_people_info():
-    return query_bigquery_table("people_info")
-
-# print(query_collection_info())
+    # return query_bigquery_table("people_info")
+    return query_bigquery_table("people")
 
 
 # print(query_movie_details())
@@ -58,6 +60,15 @@ def query_people_info():
 # Index(['int64_field_0', 'collection_id', 'name', 'number_movies_before_2020',
 #        'avg_popularity_before_2020'],
 #       dtype='object')
+# Index(['collection_id', 'name', 'number_movies_before_2020',
+#        'avg_popularity_before_2020', 'insertion_datetime'],
+#       dtype='object')
+#       collection_id  ...               insertion_datetime
+# 0            732278  ... 2024-04-12 19:47:57.172574+00:00
+# 1           1044973  ... 2024-04-12 19:47:57.172574+00:00
+# 2            782372  ... 2024-04-12 19:47:57.172574+00:00
+# 3           1155635  ... 2024-04-12 19:47:57.172574+00:00
+# 4           1018123  ... 2024-04-12 19:47:57.172574+00:00
 
 
 # print(query_weekly_domestic_performance())
