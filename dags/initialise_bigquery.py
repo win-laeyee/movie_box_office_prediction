@@ -78,7 +78,6 @@ def etl_weekly_domestic_performance_task():
     project_id = "is3107-418809"
     dataset_id = "movie_dataset"
     table_id = "weekly_domestic_performance"
-    filepath = './historical_data/clean_historical_data'
     df = get_clean_weekly_domestic_performance('', return_df = True)
     upload_df_to_table(project_id, dataset_id, table_id, df, mode="truncate")
 

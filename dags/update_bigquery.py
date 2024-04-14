@@ -6,6 +6,8 @@ from googlecloud.upload_initial_data_bigquery import upload_df_to_table #type:ig
 from googlecloud.upload_new_data_bigquery import upsert_row_to_table #type:ignore
 from extraction.video_stats.clean_per_erd import clean_raw_video_statistics #type:ignore
 from extraction.video_stats.collection import extract_raw_video_stats #type:ignore
+from extraction.tmdb_collection.collection import collection_ids_to_update, get_collection_tmdb_details, clean_update_collections_details #type:ignore
+from extraction.boxoffice_api.boxoffice_func import get_update_batch_dataset #type:ignore
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
@@ -57,12 +59,29 @@ def etl_video_stats_task():
         upsert_row_to_table(project_id, dataset_id, table_id, primary_key_columns=["movie_id"], new_row_values=record)
 
 def etl_tmdb_collection_task():
-    # TODO: append by calling `upload_df_to_table` on mode="append"
-    pass
+    # Have yet to run this (may have errors - to test run later on)
+    # dependent on movie fact table in big query
+    
+    project_id = "is3107-418809"
+    dataset_id = "movie_dataset"
+    table_id = "collection"
+    # collection_ids = collection_ids_to_update()
+    # collection_results = get_collection_tmdb_details(collection_ids)
+    # update_df = clean_update_collections_details(collection_results, save_file_path='', return_df=True)
+    # upload_df_to_table(project_id, dataset_id, table_id, update_df, mode="append")
+    
 
 def etl_weekly_domestic_performance_task():
-    # TODO: append by calling `upload_df_to_table` on mode="append"
-    pass
+    #plan (as need work with raw files):
+    #requires raw files of movie details to get english title -- figure out raw files part (later)
+    #clean the uncleaned df by merging on the english title (if too difficult can try using the data in big query already --but may have lesser matches)
+    #retrieve the latest week end date in weekly_domestic_performance table and upload those not in latest week end date to bigquery
+    project_id = "is3107-418809"
+    dataset_id = "movie_dataset"
+    table_id = "weekly_domestic_performance"
+    # start_date = Variable.get("START_DATE")
+    # year = start_date.year
+    # uncleaned_df = get_update_batch_dataset(year)
 
 
 # Airflow DAG
