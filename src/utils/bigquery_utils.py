@@ -1,17 +1,31 @@
 from google.cloud import bigquery
 import os
+import datetime
 
-# credentials_filename = "is3107-418809-62c002a9f1f7.json"
-# dataset_id = "movie_dataset"
+credentials_filename = "is3107-418809-62c002a9f1f7.json"
+dataset_id = "movie_dataset"
 
-credentials_filename = "bigquery_credentials.json"
-dataset_id = "firm-catalyst-417613.IS3107"
+# credentials_filename = "bigquery_credentials.json"
+# dataset_id = "firm-catalyst-417613.IS3107"
 
 keyfile_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../secrets", credentials_filename))
 client = bigquery.Client.from_service_account_json(keyfile_path)
 
 def query_bigquery_table(table_name):
-    QUERY = f'SELECT * FROM `{dataset_id}.{table_name}`'
+    today = datetime.date(2024, 4, 13) #datetime.date.today()
+    days_to_subtract =  today.weekday() + 1
+    last_sunday = today - datetime.timedelta(days=days_to_subtract) if days_to_subtract != 7 else today
+
+    last_sunday_str = last_sunday.strftime('%Y-%m-%d')
+    today_str = today.strftime('%Y-%m-%d')
+
+
+    QUERY = f"""
+        SELECT * 
+        FROM `{dataset_id}.{table_name}`
+        WHERE insertion_datetime >= TIMESTAMP('{last_sunday_str}')
+        AND insertion_datetime <= TIMESTAMP('{today_str}')
+        """
     try:
         query_job = client.query(QUERY) 
         data = query_job.result().to_dataframe()  
@@ -22,22 +36,25 @@ def query_bigquery_table(table_name):
         return None
 
 def query_movie_details():
-    return query_bigquery_table("movie_details")
+    # return query_bigquery_table("movie_details")
+    return query_bigquery_table("movie")
 
 def query_video_stats():
-    return query_bigquery_table("final_clean_video_stats")
+    # return query_bigquery_table("final_clean_video_stats")
+    return query_bigquery_table("video_stats")
 
 def query_collection_info():
-    return query_bigquery_table("collection_info")
-    # return query_bigquery_table("collection")
+    # return query_bigquery_table("collection_info")
+    return query_bigquery_table("collection")
 
 def query_weekly_domestic_performance():
     return query_bigquery_table("weekly_domestic_performance")
 
 def query_people_info():
-    return query_bigquery_table("people_info")
+    # return query_bigquery_table("people_info")
+    return query_bigquery_table("people")
 
-# print(query_collection_info())
+print(query_collection_info())
 
 
 # print(query_movie_details())
