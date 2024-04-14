@@ -102,7 +102,7 @@ def get_popularity_over_time(popularity_metric):
         genre_popularity_over_time = df_exploded.groupby(['genres', pd.Grouper(key='week_end_date', freq='W')])[popularity_metric].sum().reset_index()
     else:
         genre_popularity_over_time = df_exploded.groupby(['genres', pd.Grouper(key='week_end_date', freq='W')])[popularity_metric].mean().reset_index()
-       
+        genre_popularity_over_time[popularity_metric] = genre_popularity_over_time[popularity_metric].round(0).astype(int)
 
     return genre_popularity_over_time
 
