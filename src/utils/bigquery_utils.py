@@ -12,20 +12,7 @@ keyfile_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../se
 client = bigquery.Client.from_service_account_json(keyfile_path)
 
 def query_bigquery_table(table_name):
-    today = datetime.date(2024, 4, 13) #datetime.date.today()
-    days_to_subtract =  today.weekday() + 1
-    last_sunday = today - datetime.timedelta(days=days_to_subtract) if days_to_subtract != 7 else today
-
-    last_sunday_str = last_sunday.strftime('%Y-%m-%d')
-    today_str = today.strftime('%Y-%m-%d')
-
-
-    QUERY = f"""
-        SELECT * 
-        FROM `{dataset_id}.{table_name}`
-        WHERE insertion_datetime >= TIMESTAMP('{last_sunday_str}')
-        AND insertion_datetime <= TIMESTAMP('{today_str}')
-        """
+    QUERY = f'SELECT * FROM `{dataset_id}.{table_name}`'
     try:
         query_job = client.query(QUERY) 
         data = query_job.result().to_dataframe()  
@@ -54,8 +41,6 @@ def query_people_info():
     # return query_bigquery_table("people_info")
     return query_bigquery_table("people")
 
-print(query_collection_info())
-
 
 # print(query_movie_details())
 # Index(['movie_id', 'original_title', 'imdb_id', 'revenue', 'budget',
@@ -75,6 +60,15 @@ print(query_collection_info())
 # Index(['int64_field_0', 'collection_id', 'name', 'number_movies_before_2020',
 #        'avg_popularity_before_2020'],
 #       dtype='object')
+# Index(['collection_id', 'name', 'number_movies_before_2020',
+#        'avg_popularity_before_2020', 'insertion_datetime'],
+#       dtype='object')
+#       collection_id  ...               insertion_datetime
+# 0            732278  ... 2024-04-12 19:47:57.172574+00:00
+# 1           1044973  ... 2024-04-12 19:47:57.172574+00:00
+# 2            782372  ... 2024-04-12 19:47:57.172574+00:00
+# 3           1155635  ... 2024-04-12 19:47:57.172574+00:00
+# 4           1018123  ... 2024-04-12 19:47:57.172574+00:00
 
 
 # print(query_weekly_domestic_performance())
