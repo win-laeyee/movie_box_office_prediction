@@ -104,38 +104,66 @@ def dashboard():
     )
     all_genres = get_all_unique_genres()
     selected_genres = st.multiselect('Select Genre(s):', all_genres, default=all_genres, key="genre_rev_over_time_multiselect")
-    
-    df_rev_over_time = get_rev_over_time(rev_or_profit)
-    filtered_data = df_rev_over_time[df_rev_over_time['genres'].isin(selected_genres)]
+    if not selected_genres:
+        st.warning('Please select at least one genre to display the chart.')
+        empty_chart = alt.Chart(pd.DataFrame()).mark_line().encode(
+            x=alt.X('week_end_date:T', axis=alt.Axis(title='Week End Date')),
+            y=alt.Y(f'{rev_or_profit.lower()}:Q', axis=alt.Axis(title=f'{rev_or_profit}'))
+        ).properties(
+            width=700,
+            height=400
+        )
+        st.altair_chart(empty_chart, use_container_width=True)
+    else:
+        df_rev_over_time = get_rev_over_time(rev_or_profit)
+        filtered_data = df_rev_over_time[df_rev_over_time['genres'].isin(selected_genres)]
 
-    pivoted_data = filtered_data.pivot(index='week_end_date', columns='genres', values=rev_or_profit.lower()).reset_index()
+        pivoted_data = filtered_data.pivot(index='week_end_date', columns='genres', values=rev_or_profit.lower()).reset_index()
 
-    melted_data = pivoted_data.melt('week_end_date', var_name='Genre', value_name=rev_or_profit.lower())
-    y_value_range = st.slider(
-        f'Select the range of {rev_or_profit} values',
-        min_value=int(melted_data[rev_or_profit.lower()].min()), 
-        max_value=int(melted_data[rev_or_profit.lower()].max()),
-        value=(int(melted_data[rev_or_profit.lower()].min()), int(melted_data[rev_or_profit.lower()].max())),
-        key="genre_rev_over_time_slider"
-    )
-    melted_data = melted_data[(melted_data[rev_or_profit.lower()] >= y_value_range[0]) & 
-                            (melted_data[rev_or_profit.lower()] <= y_value_range[1])]
-    line_chart = alt.Chart(melted_data).mark_line(point=True).encode(
-        x=alt.X('week_end_date:T', axis=alt.Axis(title='Week End Date')),
-        y=alt.Y(f'{rev_or_profit.lower()}:Q', axis=alt.Axis(title=f'{rev_or_profit}')),
-        color='Genre:N',
-        tooltip=['week_end_date', f'{rev_or_profit.lower()}', 'Genre']
-    ).properties(
-        width=700,
-        height=400
-    ).configure_legend(
-        strokeColor='gray',
-        fillColor='#EEEEEE',
-        padding=10,
-        cornerRadius=10,
-        orient='right'
-    )
-    st.altair_chart(line_chart, use_container_width=True)
+        melted_data = pivoted_data.melt('week_end_date', var_name='Genre', value_name=rev_or_profit.lower())
+
+        if not melted_data[rev_or_profit.lower()].any():
+            st.warning(f'No {rev_or_profit.lower()} data available for the selected genre(s).')
+            empty_chart = alt.Chart(pd.DataFrame()).mark_line().encode(
+                x=alt.X('week_end_date:T', axis=alt.Axis(title='Week End Date')),
+                y=alt.Y(f'{rev_or_profit.lower()}:Q', axis=alt.Axis(title=f'{rev_or_profit}'))
+            ).properties(
+                width=700,
+                height=400
+            )
+            st.altair_chart(empty_chart, use_container_width=True)
+        else:
+            # Check if there are multiple unique values for the revenue or profit
+            unique_values = melted_data[rev_or_profit.lower()].unique()
+            if len(unique_values) > 1:
+                y_value_range = st.slider(
+                    f'Select the range of {rev_or_profit} values',
+                    min_value=int(melted_data[rev_or_profit.lower()].min()), 
+                    max_value=int(melted_data[rev_or_profit.lower()].max()),
+                    value=(int(melted_data[rev_or_profit.lower()].min()), int(melted_data[rev_or_profit.lower()].max())),
+                    key="genre_rev_over_time_slider"
+                )
+            elif len(unique_values) == 1:
+                y_value_range = (unique_values[0], unique_values[0])
+
+            melted_data = melted_data[(melted_data[rev_or_profit.lower()] >= y_value_range[0]) & 
+                                    (melted_data[rev_or_profit.lower()] <= y_value_range[1])]
+            line_chart = alt.Chart(melted_data).mark_line(point=True).encode(
+                x=alt.X('week_end_date:T', axis=alt.Axis(title='Week End Date')),
+                y=alt.Y(f'{rev_or_profit.lower()}:Q', axis=alt.Axis(title=f'{rev_or_profit}')),
+                color='Genre:N',
+                tooltip=['week_end_date', f'{rev_or_profit.lower()}', 'Genre']
+            ).properties(
+                width=700,
+                height=400
+            ).configure_legend(
+                strokeColor='gray',
+                fillColor='#EEEEEE',
+                padding=10,
+                cornerRadius=10,
+                orient='right'
+            )
+            st.altair_chart(line_chart, use_container_width=True)
 
 
 
@@ -155,38 +183,65 @@ def dashboard():
     selected_genres = st.multiselect(
         'Select Genre(s):', all_genres, default=all_genres, key="genre_pop_over_time_multiselect"
     )
+    if not selected_genres:
+        st.warning('Please select at least one genre to display the chart.')
+        empty_chart = alt.Chart(pd.DataFrame()).mark_line().encode(
+            x=alt.X('week_end_date:T', axis=alt.Axis(title='Week End Date')),
+            y=alt.Y(f'{y_metric_mapping[y_axis_metric]}:Q', axis=alt.Axis(title=f'{y_axis_metric}'))
+        ).properties(
+            width=700,
+            height=400
+        )
+        st.altair_chart(empty_chart, use_container_width=True)
+    else:
 
-    filtered_data = df_pop_over_time[df_pop_over_time['genres'].isin(selected_genres)]
-    pivoted_data = filtered_data.pivot(index='week_end_date', columns='genres', values=y_metric_mapping[y_axis_metric]).reset_index()
-    melted_data = pivoted_data.melt('week_end_date', var_name='Genre', value_name=y_metric_mapping[y_axis_metric])
-    melted_data = melted_data.dropna(subset=[y_metric_mapping[y_axis_metric]])
+        filtered_data = df_pop_over_time[df_pop_over_time['genres'].isin(selected_genres)]
+        pivoted_data = filtered_data.pivot(index='week_end_date', columns='genres', values=y_metric_mapping[y_axis_metric]).reset_index()
+        melted_data = pivoted_data.melt('week_end_date', var_name='Genre', value_name=y_metric_mapping[y_axis_metric])
+        melted_data = melted_data.dropna(subset=[y_metric_mapping[y_axis_metric]])
+        
+        if not melted_data[y_metric_mapping[y_axis_metric]].any():
+            st.warning(f'No {y_axis_metric} data available for the selected genre(s).')
+            empty_chart = alt.Chart(pd.DataFrame()).mark_line().encode(
+                x=alt.X('week_end_date:T', axis=alt.Axis(title='Week End Date')),
+                y=alt.Y(f'{y_metric_mapping[y_axis_metric]}:Q', axis=alt.Axis(title=f'{y_axis_metric}'))
+            ).properties(
+                width=700,
+                height=400
+            )
+            st.altair_chart(empty_chart, use_container_width=True)
+        else:
+            unique_values = melted_data[y_metric_mapping[y_axis_metric]].unique()
+            if len(unique_values) > 1:
+                y_value_range = st.slider(
+                    f'Select the range of {y_axis_metric} values',
+                    min_value=int(melted_data[y_metric_mapping[y_axis_metric]].min()), 
+                    max_value=int(melted_data[y_metric_mapping[y_axis_metric]].max()),
+                    value=(int(melted_data[y_metric_mapping[y_axis_metric]].min()), int(melted_data[y_metric_mapping[y_axis_metric]].max())),
+                    key="genre_pop_over_time_slider"
+                )
+            elif len(unique_values) == 1:
+                y_value_range = (unique_values[0], unique_values[0])
 
-    y_value_range = st.slider(
-        f'Select the range of {y_axis_metric} values',
-        min_value=int(melted_data[y_metric_mapping[y_axis_metric]].min()), 
-        max_value=int(melted_data[y_metric_mapping[y_axis_metric]].max()),
-        value=(int(melted_data[y_metric_mapping[y_axis_metric]].min()), int(melted_data[y_metric_mapping[y_axis_metric]].max())),
-        key="genre_pop_over_time_slider"
-    )
-    melted_data = melted_data[(melted_data[y_metric_mapping[y_axis_metric]] >= y_value_range[0]) & 
-                            (melted_data[y_metric_mapping[y_axis_metric]] <= y_value_range[1])]
-    line_chart = alt.Chart(melted_data).mark_line(point=True).encode(
-        x=alt.X('week_end_date:T', axis=alt.Axis(title='Week End Date')),
-        y=alt.Y(f'{y_metric_mapping[y_axis_metric]}:Q', scale=alt.Scale(domain=y_value_range), axis=alt.Axis(title=y_axis_metric)),
-        color='Genre:N',
-        tooltip=['week_end_date', y_metric_mapping[y_axis_metric], 'Genre']
-    ).properties(
-        width=700,
-        height=400
-    ).configure_legend(
-        strokeColor='gray',
-        fillColor='#EEEEEE',
-        padding=10,
-        cornerRadius=10,
-        orient='right'
-    )
-    st.altair_chart(line_chart, use_container_width=True)
-    
+            melted_data = melted_data[(melted_data[y_metric_mapping[y_axis_metric]] >= y_value_range[0]) & 
+                                    (melted_data[y_metric_mapping[y_axis_metric]] <= y_value_range[1])]
+            line_chart = alt.Chart(melted_data).mark_line(point=True).encode(
+                x=alt.X('week_end_date:T', axis=alt.Axis(title='Week End Date')),
+                y=alt.Y(f'{y_metric_mapping[y_axis_metric]}:Q', scale=alt.Scale(domain=y_value_range), axis=alt.Axis(title=y_axis_metric)),
+                color='Genre:N',
+                tooltip=['week_end_date', y_metric_mapping[y_axis_metric], 'Genre']
+            ).properties(
+                width=700,
+                height=400
+            ).configure_legend(
+                strokeColor='gray',
+                fillColor='#EEEEEE',
+                padding=10,
+                cornerRadius=10,
+                orient='right'
+            )
+            st.altair_chart(line_chart, use_container_width=True)
+            
 
 
     # graph
@@ -379,6 +434,16 @@ def dashboard():
     st.markdown('<h3>Top 5 Movies by Box Office Revenue</h3>', unsafe_allow_html=True)
     df = get_top_5_movies()   
     df['Genres'] = df['Genres'].apply(lambda x: ', '.join(ast.literal_eval(x)) if isinstance(x, str) else ', '.join(x))
+    st.markdown(
+        """
+        <style>
+        .stDataFrame {
+            width: 100%;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
     st.dataframe(df.style.
                  highlight_max(subset='Revenue', color='#A6E0B5').
                  highlight_max(subset='TMDB Popularity', color='#A6E0B5').

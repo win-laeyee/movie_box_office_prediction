@@ -1,10 +1,14 @@
 from google.cloud import bigquery
 import os
 
+# credentials_filename = "is3107-418809-62c002a9f1f7.json"
+# dataset_id = "movie_dataset"
+
 credentials_filename = "bigquery_credentials.json"
+dataset_id = "firm-catalyst-417613.IS3107"
+
 keyfile_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../secrets", credentials_filename))
 client = bigquery.Client.from_service_account_json(keyfile_path)
-dataset_id = "firm-catalyst-417613.IS3107"
 
 def query_bigquery_table(table_name):
     QUERY = f'SELECT * FROM `{dataset_id}.{table_name}`'
@@ -25,12 +29,16 @@ def query_video_stats():
 
 def query_collection_info():
     return query_bigquery_table("collection_info")
+    # return query_bigquery_table("collection")
 
 def query_weekly_domestic_performance():
     return query_bigquery_table("weekly_domestic_performance")
 
 def query_people_info():
     return query_bigquery_table("people_info")
+
+# print(query_collection_info())
+
 
 # print(query_movie_details())
 # Index(['movie_id', 'original_title', 'imdb_id', 'revenue', 'budget',
