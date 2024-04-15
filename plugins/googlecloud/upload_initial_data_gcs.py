@@ -26,8 +26,6 @@ def upload_blob(bucket_name, source_file_name, destination_blob_name):
 
     print(f"File {source_file_name} uploaded to {destination_blob_name}.")
 
-
-
 def upload_many_blobs_with_transfer_manager(bucket_name, filenames, source_directory="", workers=8):
     """Upload every file in a list to a bucket, concurrently in a process pool.
 
@@ -54,7 +52,6 @@ def upload_many_blobs_with_transfer_manager(bucket_name, filenames, source_direc
             print("Failed to upload {} due to exception: {}".format(name, result))
         else:
             print("Uploaded {} to {}.".format(name, bucket.name))
-
 
 def delete_many_blobs(bucket_name, blob_names):
     """Deletes multiple blobs from the bucket."""

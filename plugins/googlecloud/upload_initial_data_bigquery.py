@@ -34,12 +34,11 @@ def upload_df_to_table(project_id, dataset_id, table_id, df, mode):
     elif mode == "empty":
         job_config.write_disposition = bigquery.WriteDisposition.WRITE_EMPTY  # Write only when tables empty - ensure no any overwrite
 
-    df['insertion_datetime'] = datetime.now() #create new column if not exist and save to same file
+    df['insertion_datetime'] = datetime.now() # create new column if not exist and save to same file
     job = client.load_table_from_dataframe(df, table_ref, job_config=job_config)
     job.result() # Wait for the job to complete
 
     print(f"Dataframe uploaded to table {table_id} in dataset {dataset_id} successfully.")
-
 
 def upload_csv_to_table(project_id, dataset_id, table_id, csv_file_path, mode):
     """
@@ -74,7 +73,6 @@ def upload_csv_to_table(project_id, dataset_id, table_id, csv_file_path, mode):
     elif mode == "empty":
         job_config.write_disposition = bigquery.WriteDisposition.WRITE_EMPTY  # Write only when tables empty - ensure no any overwrite
 
-    
     df = pd.read_csv(csv_file_path)
     df['insertion_datetime'] = datetime.now() #create new column if not exist and save to same file
     df.to_csv(csv_file_path, index=False)

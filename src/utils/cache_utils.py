@@ -7,9 +7,15 @@ os.makedirs(CACHE_DIR, exist_ok=True)
 
 def is_cache_fresh(cache_file):
     if os.path.exists(cache_file):
-        modified_time = os.path.getmtime(cache_file)
-        current_time = datetime.datetime.now().timestamp()
-        return current_time - modified_time < CACHE_EXPIRATION_TIME
+        # modified_time = os.path.getmtime(cache_file)
+        # current_time = datetime.datetime.now().timestamp()
+        # return current_time - modified_time < CACHE_EXPIRATION_TIME
+        modified_time = datetime.datetime.fromtimestamp(os.path.getmtime(cache_file)).date()
+        today = datetime.date.today()  #datetime.date(2024, 4, 21)
+        days_to_subtract = today.weekday() + 1
+        last_sunday = today - datetime.timedelta(days=days_to_subtract) if days_to_subtract != 7 else today
+        return modified_time >= last_sunday
+
     return False
 
 def load_from_cache(cache_file):
@@ -43,5 +49,5 @@ def clear_cache():
         except Exception as e:
             print(f"Failed to delete {file_path}: {e}")
 
-CACHE_EXPIRATION_TIME = 3600  # 1 hour
-clear_cache()
+# CACHE_EXPIRATION_TIME = 3600  # 1 hour
+# print(is_cache_fresh(os.path.join(CACHE_DIR, "people_info.pkl")))
