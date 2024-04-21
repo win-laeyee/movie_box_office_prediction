@@ -34,7 +34,7 @@ def get_top_5_movies():
     movie_details_df = get_movie_details()
     top_movies = movie_details_df.sort_values(by='revenue', ascending=False).head(5)
     columns_to_display = [
-        'original_title', 'genres', 'revenue',
+        'title', 'genres', 'revenue',
         'tmdb_popularity', 'tmdb_vote_average'
     ]
     top_movies_display = top_movies[columns_to_display]
@@ -46,7 +46,7 @@ def get_top_5_movies():
 def merge_movie_weekly_performance():
     df_time = get_weekly_domestic_performance()
     df_rev = get_movie_details()
-    merged_df = pd.merge(df_time, df_rev, left_on='id', right_on='movie_id', how='inner', suffixes=('_time', '_rev'))
+    merged_df = pd.merge(df_time, df_rev, left_on='movie_id', right_on='movie_id', how='inner', suffixes=('_time', '_rev'))
     # merged_df = merged_df.drop(columns=['Unnamed: 0'])
     # merged_df = merged_df.drop(columns=['id'])
     return merged_df
@@ -63,7 +63,8 @@ def get_rev_over_time(rev_or_profit):
 
     merged_df['week_end_date'] = pd.to_datetime(merged_df['week_end_date'])
     
-    merged_df['genres'] = merged_df['genres'].apply(ast.literal_eval)
+    # merged_df['genres'] = merged_df['genres'].astype(str)
+    # merged_df['genres'] = merged_df['genres'].apply(ast.literal_eval)
     df_exploded = merged_df.explode('genres')
     df_exploded = df_exploded.reset_index(drop=True)
 
@@ -82,8 +83,8 @@ def get_rev_over_time(rev_or_profit):
 def get_all_unique_genres():
     movie_df = get_movie_details()
     movie_df = movie_df.dropna(subset=['genres'])
-
-    movie_df['genres'] = movie_df['genres'].apply(ast.literal_eval)
+    # movie_df['genres'] = movie_df['genres'].astype(str)
+    # movie_df['genres'] = movie_df['genres'].apply(ast.literal_eval)
     unique_genres = set(genre for sublist in movie_df['genres'] for genre in sublist)
 
     return unique_genres
@@ -94,7 +95,7 @@ def get_popularity_over_time(popularity_metric):
 
     merged_df['week_end_date'] = pd.to_datetime(merged_df['week_end_date'])
     
-    merged_df['genres'] = merged_df['genres'].apply(ast.literal_eval)
+    # merged_df['genres'] = merged_df['genres'].apply(ast.literal_eval)
     df_exploded = merged_df.explode('genres')
     df_exploded = df_exploded.reset_index(drop=True)
 

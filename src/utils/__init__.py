@@ -10,5 +10,7 @@ from .dataframe_utils import (
     calculate_avg_rev_by_actor, 
     include_profit_in_df, 
     calculate_roi, 
-    merge_movie_video_stats
+    merge_movie_video_stats,
+    get_people_info,
+    get_collection_info
 )
