@@ -98,4 +98,4 @@ with DAG(dag_id = 'initialise_bigquery', default_args=default_args, schedule_int
     etl_tmdb_collection = PythonOperator(task_id='etl_tmdb_collection', python_callable=etl_tmdb_collection_task)
     etl_weekly_domestic_performance = PythonOperator(task_id='etl_weekly_domestic_performance', python_callable=etl_weekly_domestic_performance_task)
 
-    setup_bigquery >> [etl_tmdb_movie, etl_tmdb_person, etl_video_stats, etl_tmdb_collection, etl_weekly_domestic_performance]
+    setup_bigquery >> [etl_tmdb_movie, etl_tmdb_person, etl_video_stats, etl_tmdb_collection] >> etl_weekly_domestic_performance
