@@ -142,7 +142,6 @@ def upload_raw_initial_movie_tmdb_details_gcs():
         historicaldata_dir = os.path.join(os.path.dirname(plugins_dir), "historical_data") 
         str_directory = os.path.join(historicaldata_dir, 'raw_historical_data/tmdb_movie')
         directory = Path(str_directory)
-        directory = Path(str_directory)
         filenames = list([file.name for file in directory.glob('*.ndjson')])
         delete_many_blobs(bucket_name, filenames)
         print(f"{filenames=}")
@@ -171,7 +170,7 @@ def clean_raw_movie_details(save_file_path:str, return_df=False):
         filepath (str) or dataframe (pd.Dataframe)
     """
     
-    movie_results = get_raw_tmdb_movie_details_gcs() #How do I only get new data in google cloud storage
+    movie_results = get_raw_tmdb_movie_details_gcs() 
     
     selected_columns = ['budget', 'imdb_id', 'original_language', 'release_date',
                     'revenue', 'runtime', 'status']
