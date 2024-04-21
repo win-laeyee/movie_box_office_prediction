@@ -4,7 +4,8 @@ import pandas as pd
 import numpy as np
 import os
 from datetime import date, datetime
-from googlecloud.read_data_gcs import read_blob, list_blobs
+from googlecloud.read_data_gcs import read_blob, list_blobs, list_blobs_object
+from googlecloud.read_data_bigquery import load_data_from_table
 from google.cloud import storage
 from io import BytesIO
 
@@ -23,6 +24,16 @@ def get_tmdb_date_id_title_gcs():
         df = pd.concat([df, file_content], axis=0)
     df["title_cleaned"] = df["title"].str.strip().str.replace(r'\W+', ' ', regex=True).str.lower()
 
+    return df
+
+def get_tmdb_date_id_title_bigquery():
+    """Get Movie Data from bigquery and transform (release_date, id, title)"""
+    query = f'''
+    SELECT release_date, movie_id AS id, title
+    FROM `is3107-418809.movie_dataset.movie`
+    '''
+    df = load_data_from_table(query)
+    df["title_cleaned"] = df["title"].str.strip().str.replace(r'\W+', ' ', regex=True).str.lower()
     return df
 
 def first_friday(year):
@@ -46,16 +57,13 @@ def get_weeks_end_date(start_year:int=2021, end_year:int=2030):
     df["week_end_date"] = df["period_week"].dt.end_time.dt.date
     return df[["year", "week", "week_end_date"]]
 
-def get_boxofficemojo_data_gcs():
-    """Get Raw Box Office Mojo Data from GCS and transform (release_date, id, title)"""
-    bucket_name = "movies_tmdb"
-    filenames = list_blobs("movies_tmdb", prefix="boxofficemojo_data")
-    df =  pd.DataFrame()
-    for filename in filenames:
-        file_content = read_blob(bucket_name, filename)
-        df = pd.concat([df, file_content], axis=0)
-    
-    #cleaning
+def cleaning_raw_data(df:pd.DataFrame):
+    """
+    Clean the raw boxofficemojo data by performing various transformations and filtering.
+
+    Args:
+        df (pd.DataFrame): The raw data to be cleaned.
+    """
     df["is_rerelease"] = df["Release"].str.contains('(?:.+\d{4}\sRe-release)|(?:.+\d{2}th\sAnniversary)|(?:.+4K\sRestoration)', regex=True).astype(int)
     df["title_cleaned"] = df["Release"].str.strip().str.replace(r'\W+', ' ', regex=True).str.lower()
     df["gross"] = df["Gross"].str.replace(',', '').str.replace('$', '').astype(int)
@@ -70,6 +78,17 @@ def get_boxofficemojo_data_gcs():
 
     return intermmediate_df
 
+def get_boxofficemojo_data_gcs():
+    """Get Raw Box Office Mojo Data from GCS and transform (release_date, id, title)"""
+    bucket_name = "movies_tmdb"
+    filenames = list_blobs("movies_tmdb", prefix="boxofficemojo_data")
+    df =  pd.DataFrame()
+    for filename in filenames:
+        file_content = read_blob(bucket_name, filename)
+        df = pd.concat([df, file_content], axis=0)
+    
+    return cleaning_raw_data(df)
+
 #Main function
 def get_clean_weekly_domestic_performance(data_path:str, return_df=False):
     """
@@ -81,7 +100,7 @@ def get_clean_weekly_domestic_performance(data_path:str, return_df=False):
     Returns:
         filepath (str) or dataframe (pd.Dataframe)
     """
-    df = get_tmdb_date_id_title_gcs()
+    df = get_tmdb_date_id_title_bigquery()
     intermmediate_df = get_boxofficemojo_data_gcs()
 
     final_df = intermmediate_df.merge(df, on='title_cleaned', how='left')
@@ -105,6 +124,66 @@ def get_clean_weekly_domestic_performance(data_path:str, return_df=False):
         interested_final_df.to_csv(os.path.join(folder_path, f"cleaned_weekly_domestic_performance.csv"), index=False)
 
         return str(os.path.join(folder_path, f"cleaned_weekly_domestic_performance.csv"))
+    else:
+        return interested_final_df
+
+#### update functions
+def get_boxofficedata_all():
+    #initialise data "movies_tmdb"
+    bucket_name = "movies_tmdb"
+    filenames = list_blobs("movies_tmdb", prefix="boxofficemojo_data")
+    df =  pd.DataFrame()
+    #read file from initial gcs and get interested col
+    for filename in filenames:
+        file_content = read_blob(bucket_name, filename)
+        df = pd.concat([df, file_content], axis=0)
+
+    #data from update bucket
+    bucket_name = "update_movies_tmdb"
+    blobs = sorted(list(list_blobs_object(bucket_name, prefix="update_boxofficemojo")), key=lambda blob: blob.time_created)
+    filenames_update = [blob.name for blob in blobs]
+    for filename in filenames_update:
+        file_content = read_blob(bucket_name, filename)
+        df = pd.concat([df, file_content], axis=0)
+
+    return df.drop_duplicates(subset=['year', 'week', 'Release'], keep='last', ignore_index=True)
+    
+
+def clean_update_weekly_domestic_performance(data_path:str, return_df=False):
+    """
+    Cleans and update processes the weekly domestic performance data for movies from raw data extracted.
+
+    Args:
+        intermmediate_df(pd.Dataframe): raw data extracted from box office mojo
+        data_path (str): The path to the folder where the cleaned data will be saved.
+
+    Returns:
+        filepath (str) or dataframe (pd.Dataframe)
+    """
+    df = get_tmdb_date_id_title_bigquery()
+    intermmediate_df = cleaning_raw_data(get_boxofficedata_all())
+
+    final_df = intermmediate_df.merge(df, on='title_cleaned', how='left')
+    final_df = final_df.dropna(subset=['id']) #drop those that we can't find a match (state as not available)
+    final_df['likely_release_date'] = pd.to_datetime(final_df['likely_release_date'])
+    final_df['release_date'] = pd.to_datetime(final_df['release_date'])
+    final_df['days_diff'] = (final_df['likely_release_date'] - final_df['release_date']).dt.days.abs()
+    final_df.columns = final_df.columns.str.lower()
+    final_df = final_df.loc[final_df.groupby(['title_cleaned', 'week_end_date'])['days_diff'].idxmin()].sort_values(['week_end_date', 'rank']) #by title and week, find most likely id
+    final_df['id'] = final_df['id'].astype(int, errors='ignore')
+
+    interested_final = ['week_end_date', 'id', 'rank', 'gross', 'theaters']
+    #choose 50 as cut off (increasing days diff increases uncertainty of correct matches)
+    interested_final_df = (final_df.loc[final_df['days_diff']<=50,interested_final]
+                           .rename(columns={'id': 'movie_id', 'gross':'domestic_gross', 'theaters': 'domestic_theaters_count'}))
+
+    if not return_df:
+        folder_path = data_path
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+        date_now = datetime.now().date()
+        interested_final_df.to_csv(os.path.join(folder_path, f"cleaned_update_weekly_domestic_performance_{date_now}.csv"), index=False)
+        return str(os.path.join(folder_path, f"cleaned_update_weekly_domestic_performance_{date_now}.csv"))
     else:
         return interested_final_df
 

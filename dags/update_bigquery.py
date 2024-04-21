@@ -8,6 +8,7 @@ from extraction.video_stats.clean_per_erd import clean_raw_video_statistics #typ
 from extraction.video_stats.collection import extract_raw_video_stats #type:ignore
 from extraction.tmdb_collection.collection import collection_ids_to_update, get_collection_tmdb_details, clean_update_collections_details #type:ignore
 from extraction.boxoffice_api.boxoffice_func import get_update_batch_dataset #type:ignore
+from extraction.boxoffice_api.boxoffice_clean_per_erd import clean_update_weekly_domestic_performance #type:ignore
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
@@ -59,29 +60,44 @@ def etl_video_stats_task():
         upsert_row_to_table(project_id, dataset_id, table_id, primary_key_columns=["movie_id"], new_row_values=record)
 
 def etl_tmdb_collection_task():
-    # Have yet to run this (may have errors - to test run later on)
-    # dependent on movie fact table in big query
+    """
+    Extracts, transforms, and loads by appending new collection data into a BigQuery table. (have yet to test with airflow)
     
+    This function performs the following steps:
+    1. Calls the `collection_ids_to_update` function which compares the collection ids in movie bigquery table and collection bigquery table, returning a series of collection ids not in collection bigquery database
+    2. Calls the `get_collection_tmdb_details` function to extract raw data from tmdb collection api
+    3. Calls the `clean_update_collections_details` function to clean and transform the data and return a DataFrame.
+    4. Calls the `upload_df_to_table function` to upload the cleaned DataFrame to the specified BigQuery table, using the "append" mode.
+    """
     project_id = "is3107-418809"
     dataset_id = "movie_dataset"
     table_id = "collection"
-    # collection_ids = collection_ids_to_update()
-    # collection_results = get_collection_tmdb_details(collection_ids)
-    # update_df = clean_update_collections_details(collection_results, save_file_path='', return_df=True)
-    # upload_df_to_table(project_id, dataset_id, table_id, update_df, mode="append")
+    collection_ids = collection_ids_to_update()
+    collection_results = get_collection_tmdb_details(collection_ids)
+    update_df = clean_update_collections_details(collection_results, save_file_path='', return_df=True)
+    upload_df_to_table(project_id, dataset_id, table_id, update_df, mode="append")
     
 
-def etl_weekly_domestic_performance_task():
-    #plan (as need work with raw files):
-    #requires raw files of movie details to get english title -- figure out raw files part (later)
-    #clean the uncleaned df by merging on the english title (if too difficult can try using the data in big query already --but may have lesser matches)
-    #retrieve the latest week end date in weekly_domestic_performance table and upload those not in latest week end date to bigquery
+def etl_weekly_domestic_performance_task(): 
+    """
+    Extracts, transforms, and loads weekly domestic performance data into a BigQuery table. (have yet to test with airflow)
+    
+    This function performs the following steps:
+    1. Retrieves the start date from the Airflow Variable named "START_DATE" & Extracts the year from the start date.
+    2. Calls the `get_update_batch_dataset` function to extract raw data from box office mojo (recent 4 weeks of data) and upload to gcs
+    3. Calls the `clean_update_weekly_domestic_performance` function to clean the data (all boxofficemojo data - initialisation + update datasets) and return a DataFrame.
+    4. Calls the `upload_df_to_table function` to upload the cleaned DataFrame to the specified BigQuery table, using the "truncate" mode.
+    """
     project_id = "is3107-418809"
     dataset_id = "movie_dataset"
     table_id = "weekly_domestic_performance"
-    # start_date = Variable.get("START_DATE")
-    # year = start_date.year
-    # uncleaned_df = get_update_batch_dataset(year)
+    start_date = Variable.get("START_DATE")
+    start_date_format = datetime.strptime(start_date, "%Y-%m-%d")
+    year = start_date.year
+    get_update_batch_dataset(year)
+    update_df = clean_update_weekly_domestic_performance(data_path='', return_df=True)
+    upload_df_to_table(project_id, dataset_id, table_id, update_df, mode="truncate")
+
 
 
 # Airflow DAG
