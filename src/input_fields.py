@@ -42,16 +42,30 @@ gen_list = ["Action","Adventure","Animation","Comedy","Crime","Documentary","Dra
 def input_fields():
     st.title("🎩 Input Movie Data To Predict")
 
+    all_required_fields_filled = True
+
+
     # Text Input
     movie_title = st.text_input("Enter movie title:", "", key="movie_title")
     st.write("You entered:", movie_title)
 
+    if not movie_title:
+        all_required_fields_filled = False
+        st.warning('Please enter a movie title.')
+
     # Number Input
     budget = st.number_input("Enter movie budget (in USD):", min_value=0, value=0, step=1)
     st.write("Movie budget is:", budget)
+    if not budget:
+        all_required_fields_filled = False
+        st.warning('Please enter a movie budget.')
+
 
     runtime = st.number_input("Enter movie runtime (in minutes):", min_value=0, max_value=300, value=0, step=1)
     st.write("Movie runtime is:", runtime)
+    if not runtime:
+        all_required_fields_filled = False
+        st.warning('Please enter a movie runtime.')    
 
     # Date Picker
     release_date = st.date_input("Enter movie release date:", value=None, min_value=None, max_value=None, key=None, help=None, on_change=None, args=None, kwargs=None, format="YYYY-MM-DD", disabled=False, label_visibility="visible")
@@ -105,8 +119,10 @@ def input_fields():
     preseries = st.selectbox("Select movie series:", col_names, placeholder="Please select the movie series name", index=None)
     st.write("The movie belongs to series:", preseries)
     
+    is_button_disabled = not all_required_fields_filled
+
     
-    if st.button("Predict", key = "go_to_dashboard"):
+    if st.button("Predict", disabled=is_button_disabled, key = "go_to_dashboard"):
         print("Predict button clicked")
 
         ## Getting relevant information from database for revenue prediction
