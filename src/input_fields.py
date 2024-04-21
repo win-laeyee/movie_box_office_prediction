@@ -23,14 +23,6 @@ import ast
 from datetime import timedelta
 
 
-## Keep prediction result, set session state
-if 'clicked' not in st.session_state:
-    st.session_state.clicked = False
-
-def click_button():
-    st.session_state.clicked = True
-
-
 ## get the people information
 people_df = get_people_info()
 # print(people_df)
@@ -114,8 +106,7 @@ def input_fields():
     st.write("The movie belongs to series:", preseries)
     
     
-    st.button("Predict", on_click=click_button, key = "go_to_dashboard")
-    if st.session_state.clicked:
+    if st.button("Predict", key = "go_to_dashboard"):
         print("Predict button clicked")
 
         ## Getting relevant information from database for revenue prediction
