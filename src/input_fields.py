@@ -64,6 +64,8 @@ def input_fields():
     # Date Picker
     release_date = st.date_input("Enter movie release date:", value=None, min_value=None, max_value=None, key=None, help=None, on_change=None, args=None, kwargs=None, format="YYYY-MM-DD", disabled=False, label_visibility="visible")
     st.write("Movie release date is:", release_date)
+    if not release_date:
+        release_date = datetime.date.today()
     # print(type(release_date))  ## data type datetime.date
 
     # Dropdown Select
@@ -136,7 +138,7 @@ def input_fields():
         
         if release_date != None:
             release_at = release_date.strftime("%Y-%m-%d")
-
+            
         
 
 
