@@ -13,6 +13,142 @@ from importlib import reload
 import concurrent.futures
 import json
 
+def get_tmdb_movie_id(start_release_date, end_release_date) -> pd.Series:
+    
+    load_dotenv()
+    AUTHORIZATION = os.getenv("AUTHORIZATION") 
+    headers = {
+        "accept": "application/json",
+        "Authorization": AUTHORIZATION
+    }
+    
+    url = 'https://api.themoviedb.org/3/discover/movie?language=en-US&page=1&primary_release_date.gte=' \
+    + start_release_date + '&primary_release_date.lte=' + end_release_date + '&sort_by=primary_release_date.desc&with_release_type=3\
+    &with_origin_country=CA%7CUS%7CPR'
+    
+    response = requests.get(url, headers=headers)
+    data_dict = json.loads(response.text)
+    
+    # Extract 'id' from 'results'
+    ids = pd.DataFrame.from_dict(data_dict['results'])[['id']]
+    
+    # Extract total_pages
+    total_pages = data_dict['total_pages']
+    print('total_pages: ' + str(total_pages))
+    
+    if total_pages > 2:
+        for page in range (2, total_pages + 1):
+            url = 'https://api.themoviedb.org/3/discover/movie?language=en-US&page=' + str(page) + '&primary_release_date.gte=' \
+            + start_release_date + '&primary_release_date.lte=' + end_release_date + '&sort_by=primary_release_date.desc&with_release_type=3'
+            response = requests.get(url, headers=headers)
+            data_dict = json.loads(response.text)
+            try:
+                # Extract 'id' from 'results' and concat
+                add_ids = pd.DataFrame.from_dict(data_dict['results'])[['id']]
+                ids = pd.concat([ids, add_ids], ignore_index=True)
+            except KeyError:
+                print("KeyError occurred!")
+                print("Contents of data_dict:", data_dict)
+    return ids["id"].astype(int)
+
+def chunks(series: pd.Series, length_pieces: int = 50):
+    """
+    Splits a pandas Series into chunks of specified length.
+
+    Parameters:
+        series (pd.Series): The pandas Series to be split into chunks.
+        length_pieces (int): The length of each chunk. Default is 50.
+
+    Returns:
+        list: A list of pandas Series, where each Series represents a chunk of the original Series.
+    """
+    indices = []
+    counter = 0
+    while len(indices) < len(series):
+        indices.extend([counter] * length_pieces)
+        counter += 1
+
+    indices = np.array(indices)[:len(series)]
+    return [series.loc[indices == i] for i in np.unique(indices)]
+
+def movie_info_chunks(chunk:list):
+    """
+    Retrieves detailed information about movie collections from the TMDB API for one chunk of collection ids.
+
+    Args:
+        chunks (list): A list of series of collection IDs.
+
+    Returns:
+        list: A list containing the movie data.
+    """
+    load_dotenv()
+    AUTHORIZATION = os.getenv("AUTHORIZATION") 
+    headers = {
+        "accept": "application/json",
+        "Authorization": AUTHORIZATION
+    }
+    logging.info("Start Thread")
+    responses = []
+    for movie_id in chunk:
+        url = f'https://api.themoviedb.org/3/movie/{movie_id}?append_to_response=credits,videos,release_dates,keywords&language=en-US'
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            data_dict = json.loads(response.text)
+            responses.append(data_dict)
+        else:
+            raise Exception("Unable to retrieve TMDB data")
+    return responses
+
+def get_initial_movie_tmdb_details(file_path, start_release_date, end_release_date):
+    """
+    Retrieves collection details for all collection ids from TMDB API and saves the results to a NDJSON file.
+
+    Args:
+        file_path (str): The file path where the JSON file will be saved.
+
+    Returns:
+        None
+    """
+    reload(logging)
+    movie_ids = get_tmdb_movie_id(start_release_date, end_release_date)
+    chunks_list = chunks(movie_ids)
+    movie_results = []
+
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        results = executor.map(movie_info_chunks, chunks_list)
+
+    for result in results:
+        movie_results = movie_results + result
+
+    folder_path = file_path
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+    
+    with open(os.path.join(folder_path, "raw_movie_details.ndjson"), "w") as ndjson_file:
+        ndjson_file.write('\n'.join(map(json.dumps, final_df)))
+    
+    print(os.path.join(folder_path,  "raw_movie_details.ndjson"))
+
+def upload_raw_initial_movie_tmdb_details_gcs():
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    plugins_dir = os.path.dirname(os.path.dirname(script_dir))
+    interested_dir = os.path.join(plugins_dir, "/googlecloud")
+    json_path = os.path.join(interested_dir, "is3107-418809-62c002a9f1f7.json")
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
+
+    bucket_name = "movies_tmdb"
+
+    try:   
+        historicaldata_dir = os.path.join(os.path.dirname(plugins_dir), "historical_data") 
+        str_directory = os.path.join(historicaldata_dir, 'raw_historical_data/tmdb_movie')
+        directory = Path(str_directory)
+        filenames = list([file.name for file in directory.glob('*.ndjson')])
+        delete_many_blobs(bucket_name, filenames)
+        print(f"{filenames=}")
+        upload_many_blobs_with_transfer_manager(bucket_name, filenames=filenames, source_directory=str_directory)
+    except Exception as e:
+        print(f"Error in uploading TMDB raw data to cloud storage \n Error details: {e}")
+
 def get_raw_tmdb_movie_details_gcs():
     bucket_name = "movies_tmdb"
     filenames = list_blobs("movies_tmdb", prefix="raw_movie_details")
@@ -21,7 +157,6 @@ def get_raw_tmdb_movie_details_gcs():
         file_content = read_blob(bucket_name, filename)
         df = pd.concat([df, file_content], axis=0)
     return df
-
 
 def clean_raw_movie_details(save_file_path:str, return_df=False):
     """
@@ -35,7 +170,7 @@ def clean_raw_movie_details(save_file_path:str, return_df=False):
         filepath (str) or dataframe (pd.Dataframe)
     """
     
-    movie_results = get_raw_tmdb_movie_details_gcs() #How do I only get new data in google cloud storage
+    movie_results = get_raw_tmdb_movie_details_gcs() 
     
     selected_columns = ['budget', 'imdb_id', 'original_language', 'release_date',
                     'revenue', 'runtime', 'status']
@@ -89,7 +224,7 @@ def clean_raw_movie_details(save_file_path:str, return_df=False):
             continue #skip movies that were not released in cinemas/theatre
             
         final_data['movie_id'].append(int(row['id']))
-        final_data['title'].append(row['original_title'])
+        final_data['title'].append(row['english_title'])
         final_data['is_adult'].append(0 if row['adult'] == False else 1)
         final_data['tmdb_popularity'].append(row['popularity'])
         final_data['tmdb_vote_average'].append(row['vote_average'])
@@ -157,10 +292,13 @@ def clean_raw_movie_details(save_file_path:str, return_df=False):
     
     # Change language to its full form
     lang_url = 'https://api.themoviedb.org/3/configuration/languages'
+       
+    load_dotenv()
+    AUTHORIZATION = os.getenv("AUTHORIZATION") 
     headers = {
         "accept": "application/json",
-        "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI5ODJmYTNkYWU1OGY4Y2U1ZmU2M2Q1NmI5Njk2ZDk2MCIsInN1YiI6IjY1ZmQ1ZjRlMjI2YzU2MDE2NDZlZGU2NCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.9KniXks8_611yzqRn1AsGD6mKOhtD2bJ6twLrH8FoUo"
-        }
+        "Authorization": AUTHORIZATION
+    }
 
     lang_response = requests.get(lang_url, headers=headers)
     lang_dict = json.loads(lang_response.text)
@@ -176,7 +314,7 @@ def clean_raw_movie_details(save_file_path:str, return_df=False):
     final_df = final_df[final_df['revenue'] > 0]
     
     # Rearrange columns
-    final_df = final_df[['movie_id', 'revenue', 'budget', 'imdb_id', 'title', 'original_language', 'release_date',
+    final_df = final_df[['movie_id', 'revenue', 'budget', 'imdb_id', 'title', 'original_language', 'release_date', 'genres',
                         'runtime', 'status', 'production_companies_count', 'is_adult', 'is_adaptation',
                          'collection_id', 'cast1_id', 'cast2_id', 'director_id', 'producer_id', 'tmdb_popularity',
                          'tmdb_vote_average', 'tmdb_vote_count', 'video_key_id']]

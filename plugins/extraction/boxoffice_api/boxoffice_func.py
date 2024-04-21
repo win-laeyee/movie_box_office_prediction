@@ -9,6 +9,7 @@ from importlib import reload
 import numpy as np
 import pandas as pd
 from datetime import datetime
+import shutil
 
 
 def weeks_str() -> np.array:
@@ -79,11 +80,11 @@ def get_update_batch_dataset(year=int) -> pd.DataFrame:
         for year in np.array(range(start_year, end_year+1)):
             logging.info(f"{year=}")
             if year < now_year:
-                for week in weeks_array[50:53]:
+                for week in weeks_array[48:53]:
                     df = pd.concat([df, data_by_year_week(box_office_obj, year, week)], axis=0)
             else:
-                #at least 2 weeks worth of data every run (to ensure no missing data in dag)
-                for week in weeks_array[max(0, now_week-4):(now_week-2)]:
+                #at least 4 weeks worth of data every run (to ensure no missing data in dag)
+                for week in weeks_array[max(0, now_week-6):(now_week-2)]:
                     df = pd.concat([df, data_by_year_week(box_office_obj, year, week)], axis=0)
                     
         logging.info(f"End Data Extraction")
@@ -98,21 +99,19 @@ def get_update_batch_dataset(year=int) -> pd.DataFrame:
         file_path = os.path.join(os.path.dirname(plugins_dir), "historical_data") 
         str_directory = os.path.join(file_path, 'update_data/boxofficemojo')
     
-        folder_path = file_path
+        folder_path = str_directory
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
-        date_now = datetime.now().date
-        df.to_csv(os.path.join(folder_path, f"boxofficemojo_data_{start_year}{end_year}.csv"), index=False)
+        date_now = datetime.now().date()
+        df.to_csv(os.path.join(folder_path, f"update_boxofficemojo_{date_now}.csv"), index=False)
 
         try:   
-            bucket_name = "movies_tmdb"
-            directory = Path(str_directory)
-            filenames = [f"boxofficemojo_data_{start_year}{end_year}.csv"]
-            delete_many_blobs(bucket_name, filenames)
+            bucket_name = "update_movies_tmdb"
+            filenames = list([f"update_boxofficemojo_{date_now}.csv"])
             upload_many_blobs_with_transfer_manager(bucket_name, filenames=filenames, source_directory=str_directory)
-            #remove directory after upload
+            #remove local directory after upload
             if os.path.exists(folder_path):
-                os.rmdir(folder_path)
+                shutil.rmtree(folder_path)
         except Exception as e:
             print(f"Error in uploading weekly domestic performance data to cloud storage \n Error details: {e}")
 
