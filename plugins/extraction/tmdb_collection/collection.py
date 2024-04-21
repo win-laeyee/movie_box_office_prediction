@@ -13,6 +13,7 @@ import requests
 from importlib import reload
 import concurrent.futures
 import json
+import shutil
 
 
 def get_tmdb_collection_id_gcs() -> pd.Series:
@@ -92,7 +93,7 @@ def get_initial_collection_tmdb_details(file_path):
         None
     """
     reload(logging)
-    collection_ids = get_tmdb_collection_id_gcs()
+    collection_ids = get_tmdb_collection_id_gcs().drop_duplicates()
     chunks_list = chunks(collection_ids)
     collection_results = {}
 
@@ -178,19 +179,26 @@ def clean_raw_collections_details(save_file_path:str, return_df=False):
 
 def collection_ids_to_update() -> pd.Series:
     query_movie = '''
-    SELECT DISTINCT CAST(collection_id AS INT64)
+    SELECT DISTINCT CAST(collection_id AS INT64) AS collection_id
     FROM `is3107-418809.movie_dataset.movie`
     WHERE collection_id IS NOT NULL;
     '''
     collection_movie = load_data_from_table(query_movie)
-    
+    collection_movie_set = set(collection_movie)
+                               
     query_collection = '''
     SELECT collection_id
     FROM `is3107-418809.movie_dataset.collection`
     '''
     now_collection = load_data_from_table(query_collection)
+    now_collection_set = set(now_collection)  
 
-    return collection_movie[~collection_movie.isin(now_collection)]
+    #return those those in movie table that does not exist in collection table
+    #The difference() method returns a set that contains the difference between two sets. As a shortcut, you can use the - operator instead.
+    #The returned set contains items that exist only in the first set, and not in both sets.
+    difference = collection_movie_set - now_collection_set
+
+    return pd.Series(list(difference))
 
 
 def get_collection_tmdb_details(collection_ids):
@@ -222,22 +230,22 @@ def get_collection_tmdb_details(collection_ids):
     file_path = os.path.join(os.path.dirname(plugins_dir), "historical_data") 
     str_directory = os.path.join(file_path, 'update_data/tmdb_collection')
     
-    folder_path = file_path
+    folder_path = str_directory
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
-    date_now = datetime.now().date
+    date_now = datetime.now().date()
     with open(os.path.join(folder_path, f"update_raw_collection_data_{date_now}.json"), "w") as f:
         json.dump(collection_results, f)
 
     try:   
-        bucket_name = "movies_tmdb"
-        directory = Path(str_directory)
+        bucket_name = "update_movies_tmdb"
+        directory = Path(folder_path)
         filenames = list([file.name for file in directory.glob('*.json')])
         print(f"{filenames=}")
         upload_many_blobs_with_transfer_manager(bucket_name, filenames=filenames, source_directory=str_directory)
         #remove directory after upload
         if os.path.exists(folder_path):
-            os.rmdir(folder_path)
+            shutil.rmtree(folder_path)
     except Exception as e:
         print(f"Error in uploading TMDB raw data to cloud storage \n Error details: {e}")
 
@@ -265,7 +273,7 @@ def clean_update_collections_details(collection_results:dict, save_file_path:str
         cleaned_results.append((items["id"], items["name"].strip(), len(parts_interest), avg_popularity_before_2020))
 
     cleaned_df = pd.DataFrame(cleaned_results, 
-                            columns=["collection_id", "name", "number_movies_before_2020", "avg_popularity_before_2020"])
+                              columns=["collection_id", "name", "number_movies_before_2020", "avg_popularity_before_2020"])
     if not return_df:
         folder_path = save_file_path
         if not os.path.exists(folder_path):
