@@ -1,29 +1,19 @@
 from google.cloud import bigquery
 import os
 import pandas as df
-
-import sys
-sys.path.append('/Users/liusiyi/Desktop/IS3107/Project/repo/movie_box_office_prediction/src')
-
-
-
-# for access to bigquery data base, need to generate a service account
-# download the service account credentials in json format
-# this would be used to access bigquery
-# change the keyfile_path to where you store ur service account credentials
-keyfile_path = "secrets/is3107-418809-62c002a9f1f7.json"
-
-
-######## Bigquery Access method samples
+import streamlit as st
+from google.oauth2 import service_account
 
 ## need {project_id}.{dataset_id}.{table_id} to perform queries
 
 def read_data():
-    # start a bigquery client using ur service account credentials
-    client = bigquery.Client.from_service_account_json(keyfile_path)
-    # Perform a query.
+    credentials = service_account.Credentials.from_service_account_info(
+        st.secrets["gbq_service_account"]
+    )
+    client = bigquery.Client(credentials=credentials)
+
     QUERY = (
-        'SELECT * FROM `firm-catalyst-417613.IS3107.movie_details` '
+        'SELECT * FROM `movie_dataset.movie` '
         'LIMIT 100')
     query_job = client.query(QUERY) # API request
     data = query_job.result().to_dataframe()   # Waits for query to finish and write into a df
@@ -32,10 +22,14 @@ def read_data():
     return data
 
 def create_model():
-    client = bigquery.Client.from_service_account_json(keyfile_path)
+    credentials = service_account.Credentials.from_service_account_info(
+        st.secrets["gbq_service_account"]
+    )
+    client = bigquery.Client(credentials=credentials)
+
     QUERY = (
         """
-        CREATE MODEL `firm-catalyst-417613.IS3107.test_model_2`
+        CREATE MODEL `movie_dataset.model_v6`
         OPTIONS(model_type = 'LINEAR_REG')
         AS 
         SELECT
@@ -51,56 +45,16 @@ def create_model():
         from
         IS3107.movie_details
         """)
-    
-    # alternative create model query to be used, R-squared is much higher
-    """"
-      CREATE MODEL `firm-catalyst-417613.IS3107.test_model_4`
-      OPTIONS(model_type = 'RANDOM_FOREST_REGRESSOR')
-      AS 
-      SELECT
-      revenue as label,
-      budget,
-      release_date,
-      runtime,
-      cast1_popularity,
-      cast2_popularity,
-      director_popularity,
-      producer_popularity,
-      tmdb_popularity,
-      tmdb_vote_average,
-      tmdb_vote_count,
-      -- published_at,
-      view_count,
-      like_count,
-      comment_count,
-      avg_popularity_before_2020
-      from
-      IS3107.training_v1
-    """
     query_job = client.query(QUERY)
     output = query_job.result()
     print(output)
 
-def prep_data_for_ml():
-    client = bigquery.Client.from_service_account_json(keyfile_path)
-    QUERY = (
-        """ 
-        SELECT
-        revenue,
-        budget,
-        release_date,
-        runtime,
-        tmdb_vote_count,
-        cast(cast1_id as string) as cast1_id,
-        cast(cast2_id as string) as cast2_id,
-        cast(director_id as string) as director_id,
-        cast(producer_id as string) as producer_id
-        from
-        IS3107.movie_details
-        """)
-
 def predict_revenue(budget, release_date, runtime, is_adult, is_adaptation, cast1_popularity, cast2_popularity, director_popularity, producer_popularity, view_count, like_count, comment_count, avg_popularity_before_2020):
-    client = bigquery.Client.from_service_account_json(keyfile_path)
+
+    credentials = service_account.Credentials.from_service_account_info(
+        st.secrets["gbq_service_account"]
+    )
+    client = bigquery.Client(credentials=credentials)
     # budget = 350000
 
     ## Prepare input parameters
@@ -135,7 +89,6 @@ def predict_revenue(budget, release_date, runtime, is_adult, is_adaptation, cast
     query_job = client.query(QUERY) # API request
     data = query_job.result().to_dataframe()   # Waits for query to finish and write into a df
 
-    # print(data.iloc[0,0])
     return data.iloc[0,0]
 
 def find_value(df_name, match_value, match_column, return_column):
@@ -146,15 +99,6 @@ def find_value(df_name, match_value, match_column, return_column):
         return None
     
     
-
-# try creating a model directly using movie_details data
-# predict_revenue(350000)
-
-"""
-Apparently Bigquery free service does not include DML queries, 
-so cannot insert, delete and update table
-"""
-
 
 """
 CREATE MODEL `firm-catalyst-417613.IS3107.test_model_1`
