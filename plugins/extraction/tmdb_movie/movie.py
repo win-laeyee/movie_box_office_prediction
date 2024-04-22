@@ -160,7 +160,7 @@ def get_raw_tmdb_movie_details_gcs():
 
 def clean_raw_movie_details(save_file_path:str, return_df=False):
     """
-    Cleans the raw collection details from ndjson file and saves the cleaned results to a CSV file.
+    Cleans the raw movie details from ndjson file and saves the cleaned results to a CSV file.
 
     Args:
         raw_file_path (str): The file path of the raw collection details NDJSON file.
