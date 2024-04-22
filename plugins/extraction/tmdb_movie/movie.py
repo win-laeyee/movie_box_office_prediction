@@ -162,7 +162,7 @@ def get_raw_tmdb_movie_details_gcs():
 
 def clean_raw_movie_details(save_file_path:str, return_df=False):
     """
-    Cleans the raw collection details from ndjson file and saves the cleaned results to a CSV file.
+    Cleans the raw movie details from ndjson file and saves the cleaned results to a CSV file.
 
     Args:
         raw_file_path (str): The file path of the raw collection details NDJSON file.
@@ -226,7 +226,7 @@ def clean_raw_movie_details(save_file_path:str, return_df=False):
             continue #skip movies that were not released in cinemas/theatre
             
         final_data['movie_id'].append(int(row['id']))
-        final_data['title'].append(row['original_title'])
+        final_data['title'].append(row['english_title'])
         final_data['is_adult'].append(0 if row['adult'] == False else 1)
         final_data['tmdb_popularity'].append(row['popularity'])
         final_data['tmdb_vote_average'].append(row['vote_average'])
@@ -263,12 +263,12 @@ def clean_raw_movie_details(save_file_path:str, return_df=False):
         producer_id = None
         for job in (row['credits']['crew']):
             if job['job'] == 'Director':
-                director_id = int(job['id'])
+                director_id = (job['id'])
             elif job['job'] == 'Producer':
-                producer_id = int(job['id'])
+                producer_id = (job['id'])
 
-        final_data['director_id'].append(director_id)
-        final_data['producer_id'].append(producer_id)
+        final_data['director_id'].append(int(director_id))
+        final_data['producer_id'].append(int(producer_id))
                 
         # Videos key_id
         video_key_id = []
@@ -294,10 +294,13 @@ def clean_raw_movie_details(save_file_path:str, return_df=False):
     
     # Change language to its full form
     lang_url = 'https://api.themoviedb.org/3/configuration/languages'
+       
+    load_dotenv()
+    AUTHORIZATION = os.getenv("AUTHORIZATION") 
     headers = {
         "accept": "application/json",
-        "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI5ODJmYTNkYWU1OGY4Y2U1ZmU2M2Q1NmI5Njk2ZDk2MCIsInN1YiI6IjY1ZmQ1ZjRlMjI2YzU2MDE2NDZlZGU2NCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.9KniXks8_611yzqRn1AsGD6mKOhtD2bJ6twLrH8FoUo"
-        }
+        "Authorization": AUTHORIZATION
+    }
 
     lang_response = requests.get(lang_url, headers=headers)
     lang_dict = json.loads(lang_response.text)
