@@ -49,7 +49,7 @@ def create_model():
     output = query_job.result()
     print(output)
 
-def predict_revenue(budget, release_date, runtime, is_adult, is_adaptation, cast1_popularity, cast2_popularity, director_popularity, producer_popularity, view_count, like_count, comment_count, avg_popularity_before_2020):
+def predict_revenue(budget, release_date, runtime, is_adult, is_adaptation, cast1_popularity, cast2_popularity, director_popularity, producer_popularity, view_count, avg_popularity_before_2020):
 
     credentials = service_account.Credentials.from_service_account_info(
         st.secrets["gbq_service_account"]
@@ -59,7 +59,7 @@ def predict_revenue(budget, release_date, runtime, is_adult, is_adaptation, cast
 
     ## Prepare input parameters
     # make sure that all None values are replaced by "null" such that the SQL would work
-    input_params = [budget, release_date, runtime, is_adult, is_adaptation, cast1_popularity, cast2_popularity, director_popularity, producer_popularity, view_count, like_count, comment_count, avg_popularity_before_2020]
+    input_params = [budget, release_date, runtime, is_adult, is_adaptation, cast1_popularity, cast2_popularity, director_popularity, producer_popularity, view_count, avg_popularity_before_2020]
     input_params = ["null" if item is None else item for item in input_params]
     print(release_date)
     print(input_params[1])
@@ -69,7 +69,7 @@ def predict_revenue(budget, release_date, runtime, is_adult, is_adaptation, cast
         SELECT
           predicted_label as predicted_revenue
         FROM
-        ML.PREDICT(MODEL `movie_dataset.model_v6`, (
+        ML.PREDICT(MODEL `revenue_pred.v1_rf_regress`, (
           SELECT
             {input_params[0]} AS budget,
             cast('{input_params[1]}' AS DATE FORMAT 'YYYY-MM-DD') AS release_date,
@@ -81,14 +81,12 @@ def predict_revenue(budget, release_date, runtime, is_adult, is_adaptation, cast
             {input_params[7]} AS director_popularity,
             {input_params[8]} AS producer_popularity,
             {input_params[9]} AS view_count,
-            {input_params[10]} AS like_count,
-            {input_params[11]} AS comment_count,
-            {input_params[12]} AS avg_popularity_before_2020))
+            {input_params[10]} AS avg_popularity_before_2020))
         """
     )
     query_job = client.query(QUERY) # API request
     data = query_job.result().to_dataframe()   # Waits for query to finish and write into a df
-
+    print(data.iloc[0,0])
     return data.iloc[0,0]
 
 def find_value(df_name, match_value, match_column, return_column):

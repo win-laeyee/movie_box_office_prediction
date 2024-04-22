@@ -21,6 +21,13 @@ import pandas as pd
 import altair as alt
 import ast
 from datetime import timedelta
+import numpy as np
+from scipy.stats import t
+
+
+
+def click_button():
+    st.session_state.clicked = True
 
 
 ## get the people information
@@ -37,7 +44,16 @@ col_names.append("Others")
 col_names.append("None")
 
 ## Set list of movie genres
-gen_list = ["Action","Adventure","Animation","Comedy","Crime","Documentary","Drama","Family","Fantasy","History","Horror","Music","Mystery","Romance","Science_Fiction"]
+gen_list = ["Action","Adventure","Animation","Comedy","Crime","Documentary","Drama","Family","Fantasy","History","Horror","Music","Mystery","Romance","Science_Fiction", "TV_Movie", "Thriller", "War", "Western"]
+
+## Prediction Interval Parameters ##
+SEP = 83518474.69
+dfree = 4849
+alpha = 0.01
+critical_value = t.ppf(1 - alpha / 2, dfree)
+moe = critical_value*SEP
+print("MOE: ", moe)
+moe2 = 1.99 * 5451066
 
 def input_fields():
     st.title("🎩 Input Movie Data To Predict")
@@ -109,11 +125,11 @@ def input_fields():
     trailer_view = st.number_input("Please enter your movie trailer view count:", min_value=0, value=0, step=1)
     st.write("Your movie trailer view count is:", trailer_view)
 
-    like_count = st.number_input("Please enter your movie trailer like count:", min_value=0, value=0, step=1)
-    st.write("Your movie trailer like count is:", like_count)
+    # like_count = st.number_input("Please enter your movie trailer like count:", min_value=0, value=0, step=1)
+    # st.write("Your movie trailer like count is:", like_count)
 
-    comment_count = st.number_input("Please enter your movie trailer comment count:", min_value=0, value=0, step=1)
-    st.write("Your movie trailer comment count is:", comment_count)
+    # comment_count = st.number_input("Please enter your movie trailer comment count:", min_value=0, value=0, step=1)
+    # st.write("Your movie trailer comment count is:", comment_count)
 
     ## Series Information
     preseries = st.selectbox("Select movie series:", col_names, placeholder="Please select the movie series name", index=None)
@@ -121,8 +137,11 @@ def input_fields():
     
     is_button_disabled = not all_required_fields_filled
 
+    st.button('Predict', on_click=click_button, disabled=is_button_disabled, key = "go_to_dashboard")
     
-    if st.button("Predict", disabled=is_button_disabled, key = "go_to_dashboard"):
+    if 'clicked' not in st.session_state:
+        st.session_state.clicked = False
+    if st.session_state.clicked:
         print("Predict button clicked")
 
         ## Getting relevant information from database for revenue prediction
@@ -151,13 +170,14 @@ def input_fields():
 
         print("check if relevant values are retrieved")
         print(collection_popularity)
-        output = predict_revenue(budget, release_at, runtime, is_adult, is_adapt, cast1_popularity, cast2_popularity, director_popularity, producer_popularity, trailer_view, like_count, comment_count, collection_popularity)
-        print(output)
-        lower_bound = round(output*0.7, 2)
-        upper_bound = round(output*1.3, 2)
+        output = predict_revenue(budget, release_at, runtime, is_adult, is_adapt, cast1_popularity, cast2_popularity, director_popularity, producer_popularity, trailer_view, collection_popularity)
+        # print(output)
+        output1 = "{:,}".format(output) + " USD"
+        lower_bound = round(max(1, output-moe2), 2)
+        upper_bound = round((output+moe2), 2)
         st.subheader('Your predicted box office is', divider='rainbow')
-        outcome = "(" + str(lower_bound) + " - " + str(upper_bound) + " USD)"
-        st.subheader(output)
+        outcome = "(" + "{:,}".format(lower_bound) + " - " + "{:,}".format(upper_bound) + " USD)"
+        st.subheader(output1, " USD")
         st.markdown(f'<h5>{outcome}</h5>', unsafe_allow_html=True)
         # st.session_state['page'] = "Dashboard"
         print("Session state page set to Dashboard")
@@ -194,7 +214,11 @@ def input_fields():
 
         ### Add in potential competitors
         st.markdown('<h4>Potential Competitors</h4>', unsafe_allow_html=True)
-        filtered_df = movie_df[movie_df['genres'].apply(lambda x: any(item in x for item in genres))]
+        if len(genres) > 0:
+            filtered_df = movie_df[movie_df['genres'].apply(lambda x: any(item in x for item in genres))]
+        else:
+            filtered_df = movie_df.copy()
+
         start = release_date - timedelta(days=45)
         end = release_date + timedelta(days=45)
         start = pd.Timestamp(start)
@@ -214,7 +238,7 @@ def input_fields():
 
         filtered_df = filtered_df.rename(columns=mapping)
         filtered_df['Release Date'] = filtered_df['Release Date'].dt.date
-        filtered_df = filtered_df.sort_values(by='Release Date')
+        filtered_df = filtered_df.sort_values(by='Revenue', ascending=False)
         st.markdown(
             """
             <style>
