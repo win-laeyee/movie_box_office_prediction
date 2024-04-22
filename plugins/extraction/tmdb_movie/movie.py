@@ -73,7 +73,7 @@ def chunks(series: pd.Series, length_pieces: int = 50):
 
 def movie_info_chunks(chunk:list):
     """
-    Retrieves detailed information about movie collections from the TMDB API for one chunk of collection ids.
+    Retrieves detailed information about movie from the TMDB API for one chunk of collection ids.
 
     Args:
         chunks (list): A list of series of collection IDs.
