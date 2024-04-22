@@ -88,7 +88,7 @@ def people_info_chunks(chunk:list):
         else:
             raise Exception("Unable to retrieve TMDB data")
     return responses
-
+    
 def get_initial_people_tmdb_details(file_path):
     """
     Retrieves people details for all people ids from TMDB API and saves the results to a NDJSON file.
@@ -101,38 +101,6 @@ def get_initial_people_tmdb_details(file_path):
     """
     reload(logging)
     people_ids = get_initial_tmdb_people_id_bq()
-    chunks_list = chunks(people_ids)
-    people_results = []
-
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        results = executor.map(people_info_chunks, chunks_list)
-
-    for result in results:
-        people_results = people_results + result
-
-    folder_path = file_path
-    if not os.path.exists(folder_path):
-        os.makedirs(folder_path)
-    extraction_date = date.today().strftime('%Y%m%d')
-    filename = f"raw_people_{extraction_date}.ndjson"
-    
-    with open(os.path.join(folder_path, filename)) as ndjson_file:
-        ndjson_file.write('\n'.join(map(json.dumps, people_results)))
-    
-    print(os.path.join(folder_path,  "raw_movie_details.ndjson"))
-    
-def get_initial_people_tmdb_details(file_path):
-    """
-    Retrieves people details for all people ids from TMDB API and saves the results to a NDJSON file.
-
-    Args:
-        file_path (str): The file path where the NDJSON file will be saved.
-
-    Returns:
-        None
-    """
-    reload(logging)
-    people_ids = get_initial_tmdb_people_id_bq()[:200]
     chunks_list = chunks(people_ids)
     people_results = []
 
