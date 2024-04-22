@@ -44,7 +44,7 @@ def upload_df_to_temp_table(project_id, dataset_id, table_id, schema, df, mode):
     job.result() # Wait for the job to complete
     print(f"Dataframe uploaded to temporary table {table_id} in dataset {dataset_id} successfully.")
 
-def upsert_df_to_table(project_id, dataset_id, table_id, primary_key_columns, df):
+def upsert_df_to_table(project_id, dataset_id, table_id, primary_key_columns, df, staging_dataset_id="staging_dataset"):
     """
     Upsert a pandas Dataframe to the specified BigQuery table.
 
@@ -65,7 +65,7 @@ def upsert_df_to_table(project_id, dataset_id, table_id, primary_key_columns, df
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
     client = bigquery.Client(project=project_id)
     table_dest = f"{project_id}.{dataset_id}.{table_id}"
-    table_src = f"{project_id}.staging_dataset.{table_id}"
+    table_src = f"{project_id}.{staging_dataset_id}.{table_id}"
 
     # Add insertion datetime column to row
     df["insertion_datetime"] = datetime.now()
@@ -90,7 +90,7 @@ def upsert_df_to_table(project_id, dataset_id, table_id, primary_key_columns, df
     original_table_schema = original_table.schema
 
     # Populate temp table
-    upload_df_to_temp_table(project_id, "staging_dataset", table_id, original_table_schema, df, mode="truncate")
+    upload_df_to_temp_table(project_id, staging_dataset_id, table_id, original_table_schema, df, mode="truncate")
 
     # Execute SQL merge statement
     query_job = client.query(merge_sql)
