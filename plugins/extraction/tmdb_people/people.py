@@ -5,6 +5,7 @@ import numpy as np
 import os
 from googlecloud.read_data_gcs import read_blob, list_blobs
 from googlecloud.upload_initial_data_gcs import delete_many_blobs, upload_many_blobs_with_transfer_manager
+from googlecloud.read_data_bigquery import load_data_from_table
 from dotenv import load_dotenv
 import logging
 import requests
