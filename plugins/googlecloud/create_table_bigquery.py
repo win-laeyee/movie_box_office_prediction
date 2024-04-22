@@ -50,7 +50,6 @@ def create_table_if_not_exists(project_id, dataset_id, table_id, schema):
     json_path = os.path.join(script_dir, "is3107-418809-62c002a9f1f7.json")
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
     
-    
     client = bigquery.Client(project=project_id) # Initialize BigQuery client
     table_ref = client.dataset(dataset_id).table(table_id) # Define table reference
 
@@ -150,7 +149,7 @@ def create_weekly_domestic_performance_table(project_id="is3107-418809", dataset
     create_table_if_not_exists(project_id, dataset_id, table_id, schema)
 
 
-def create_all_tables(project_id="is3107-418809", dataset_id="movie_dataset"):
+def create_all_tables(project_id="is3107-418809", dataset_id="movie_dataset", staging_dataset_id="staging_dataset"):
     """
     Creates all the required tables in BigQuery for the movie box office prediction project.
 
@@ -158,7 +157,8 @@ def create_all_tables(project_id="is3107-418809", dataset_id="movie_dataset"):
         project_id (str, optional): The ID of the Google Cloud project. Defaults to "is3107-418809".
         dataset_id (str, optional): The ID of the BigQuery dataset. Defaults to "movie_dataset".
     """
-    create_dataset_if_not_exists(project_id, dataset_id)
+    create_dataset_if_not_exists(project_id, dataset_id) # create prod dataset
+    create_dataset_if_not_exists(project_id, staging_dataset_id) # create staging dataset
     create_movie_table(project_id, dataset_id)
     create_collection_table(project_id, dataset_id)
     create_people_table(project_id, dataset_id)
