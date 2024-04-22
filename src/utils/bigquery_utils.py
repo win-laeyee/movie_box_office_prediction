@@ -1,15 +1,19 @@
 from google.cloud import bigquery
 import os
 import datetime
+import streamlit as st
+from google.oauth2 import service_account
 
-credentials_filename = "is3107-418809-62c002a9f1f7.json"
+# credentials_filename = "is3107-418809-62c002a9f1f7.json"
+# keyfile_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../secrets", credentials_filename))
+# client = bigquery.Client.from_service_account_json(keyfile_path)
+
 dataset_id = "movie_dataset"
 
-# credentials_filename = "bigquery_credentials.json"
-# dataset_id = "firm-catalyst-417613.IS3107"
-
-keyfile_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../secrets", credentials_filename))
-client = bigquery.Client.from_service_account_json(keyfile_path)
+credentials = service_account.Credentials.from_service_account_info(
+    st.secrets["gbq_service_account"]
+)
+client = bigquery.Client(credentials=credentials)
 
 def query_bigquery_table(table_name):
     QUERY = f'SELECT * FROM `{dataset_id}.{table_name}`'
