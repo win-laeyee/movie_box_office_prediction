@@ -12,6 +12,7 @@ import requests
 from importlib import reload
 import concurrent.futures
 import json
+from datetime import date
 
 def get_initial_tmdb_people_id_bq() -> pd.Series: 
     """
@@ -78,8 +79,8 @@ def people_info_chunks(chunk:list):
     logging.info("Start Thread")
     
     responses = []
-    for movie_id in chunk:
-        url = f"https://api.themoviedb.org/3/person/{id_}?append_to_response=movie_credits&language=en-US"
+    for people_id in chunk:
+        url = f"https://api.themoviedb.org/3/person/{people_id}?append_to_response=movie_credits&language=en-US"
         response = requests.get(url, headers=headers)
         if response.status_code == 200:
             data_dict = json.loads(response.text)
@@ -116,7 +117,7 @@ def get_initial_people_tmdb_details(file_path):
     filename = f"raw_people_{extraction_date}.ndjson"
     
     with open(os.path.join(folder_path, filename)) as ndjson_file:
-        ndjson_file.write('\n'.join(map(json.dumps, movie_results)))
+        ndjson_file.write('\n'.join(map(json.dumps, people_results)))
     
     print(os.path.join(folder_path,  "raw_movie_details.ndjson"))
     
@@ -145,13 +146,13 @@ def get_initial_people_tmdb_details(file_path):
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
         
-    extraction_date = date.today().strftime('%Y%m%d')
-    filename = f"raw_people_{extraction_date}.ndjson"
+    date_now = date.today().strftime('%Y%m%d')
+    filename = f"raw_people_{date_now}.ndjson"
 
-    with open(os.path.join(folder_path, f"raw_people_{extraction_date}.ndjson"), "w") as ndjson_file:
+    with open(os.path.join(folder_path, filename), "w") as ndjson_file:
         ndjson_file.write('\n'.join(map(json.dumps, people_results)))
     
-    print(os.path.join(folder_path,  "raw_movie_details.ndjson"))
+    print(os.path.join(folder_path, filename))
 
 def get_raw_tmdb_people_details_gcs():
     bucket_name = "movies_tmdb"
@@ -243,7 +244,7 @@ def clean_raw_people_details(save_file_path:str, return_df=False):
         folder_path = save_file_path
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
-        cleaned_df.to_csv(os.path.join(folder_path, "cleaned_people_info.csv"), index=False)
+        people_info.to_csv(os.path.join(folder_path, "cleaned_people_info.csv"), index=False)
         return os.path.join(folder_path, "cleaned_people_info.csv")
     else:
         return people_info
@@ -287,3 +288,4 @@ def new_tmdb_people_id() -> pd.Series:
     difference = old_people_set - new_people_set
 
     return pd.Series(list(difference))
+

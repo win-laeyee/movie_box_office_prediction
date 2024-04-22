@@ -330,7 +330,7 @@ def clean_raw_movie_details(save_file_path:str, return_df=False):
         folder_path = save_file_path
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
-        cleaned_df.to_csv(os.path.join(folder_path, "cleaned_movie_info.csv"), index=False)
+        final_df.to_csv(os.path.join(folder_path, "cleaned_movie_info.csv"), index=False)
         return os.path.join(folder_path, "cleaned_movie_info.csv")
     else:
         return final_df
@@ -586,7 +586,7 @@ def clean_new_raw_movie_details(save_file_path:str, return_df=False):
         folder_path = save_file_path
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
-        cleaned_df.to_csv(os.path.join(folder_path, "cleaned_movie_info.csv"), index=False)
+        final_df.to_csv(os.path.join(folder_path, "cleaned_movie_info.csv"), index=False)
         return os.path.join(folder_path, "cleaned_movie_info.csv")
     else:
         return final_df
