@@ -73,10 +73,10 @@ def chunks(series: pd.Series, length_pieces: int = 50):
 
 def movie_info_chunks(chunk:list):
     """
-    Retrieves detailed information about movie from the TMDB API for one chunk of collection ids.
+    Retrieves detailed information about movie from the TMDB API for one chunk of movie ids.
 
     Args:
-        chunks (list): A list of series of collection IDs.
+        chunks (list): A list of series of movie IDs.
 
     Returns:
         list: A list containing the movie data.
@@ -101,10 +101,10 @@ def movie_info_chunks(chunk:list):
 
 def get_initial_movie_tmdb_details(file_path, start_release_date, end_release_date):
     """
-    Retrieves collection details for all collection ids from TMDB API and saves the results to a NDJSON file.
+    Retrieves movie details for all movie ids from TMDB API and saves the results to a NDJSON file.
 
     Args:
-        file_path (str): The file path where the JSON file will be saved.
+        file_path (str): The file path where the NDJSON file will be saved.
 
     Returns:
         None
@@ -123,11 +123,13 @@ def get_initial_movie_tmdb_details(file_path, start_release_date, end_release_da
     folder_path = file_path
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
+        
+    filename = f"raw_movie_details_{start_release_date}_{end_release_date}.ndjson"
     
-    with open(os.path.join(folder_path, "raw_movie_details.ndjson"), "w") as ndjson_file:
-        ndjson_file.write('\n'.join(map(json.dumps, final_df)))
+    with open(os.path.join(folder_path, filename), "w") as ndjson_file:
+        ndjson_file.write('\n'.join(map(json.dumps, movie_results)))
     
-    print(os.path.join(folder_path,  "raw_movie_details.ndjson"))
+    print(os.path.join(folder_path, filename))
 
 def upload_raw_initial_movie_tmdb_details_gcs():
     script_dir = os.path.dirname(os.path.realpath(__file__))
