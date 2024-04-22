@@ -3,7 +3,7 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.models import Variable
 from googlecloud.upload_initial_data_bigquery import upload_df_to_table #type:ignore 
-from googlecloud.upload_new_data_bigquery import upsert_row_to_table #type:ignore
+from googlecloud.upload_new_data_bigquery import upsert_df_to_table #type:ignore
 from extraction.video_stats.clean_per_erd import clean_raw_video_statistics #type:ignore
 from extraction.video_stats.collection import extract_raw_video_stats #type:ignore
 from extraction.tmdb_collection.collection import collection_ids_to_update, get_collection_tmdb_details, clean_update_collections_details #type:ignore
@@ -27,7 +27,7 @@ def set_start_date_task(**context):
         context (tuple): Kwargs contain DAG run context parameters.
     """
     end_date = datetime.strptime(context.get('ds'), "%Y-%m-%d")
-    start_date = end_date - relativedelta(months=1)
+    start_date = end_date - relativedelta(weeks=1)
     Variable.set(key="START_DATE", value=start_date)
     Variable.set(key="END_DATE", value=end_date) 
 
@@ -48,16 +48,15 @@ def etl_video_stats_task():
     This function performs the following steps:
     1. Calls the `extract_raw_video_stats` function to extract video stats data based on raw movie details data and upload it to gcs.
     2. Calls the `clean_raw_video_statistics` function to clean the raw video statistics data retrieved from gcs.
-    3. Calls the `upsert_row_to_table` function to upsert the cleaned data to the BigQuery collection table.
+    3. Calls the `upsert_df_to_table` function to upsert the cleaned data to the BigQuery collection table.
     """
     project_id = "is3107-418809"
     dataset_id = "movie_dataset"
     table_id = "video_stats"
-    start_date, end_date = Variable.get("START_DATE"), Variable.get("END_DATE")
+    start_date, end_date = datetime.strptime(Variable.get("START_DATE"), '%Y-%m-%d %H:%M:%S'), datetime.strptime(Variable.get("END_DATE"), '%Y-%m-%d %H:%M:%S')
     extract_raw_video_stats(os.path.abspath("./raw_data"), start_date=start_date, end_date=end_date)
     df = clean_raw_video_statistics(save_file_path="", start_date=start_date, end_date=end_date, return_df=True)
-    for record in df.to_dict(orient="records"): # Upsert for every row
-        upsert_row_to_table(project_id, dataset_id, table_id, primary_key_columns=["movie_id"], new_row_values=record)
+    upsert_df_to_table(project_id, dataset_id, table_id, primary_key_columns=["movie_id"], df=df)
 
 def etl_tmdb_collection_task():
     """
@@ -75,15 +74,14 @@ def etl_tmdb_collection_task():
     collection_ids = collection_ids_to_update()
     collection_results = get_collection_tmdb_details(collection_ids)
     update_df = clean_update_collections_details(collection_results, save_file_path='', return_df=True)
-    upload_df_to_table(project_id, dataset_id, table_id, update_df, mode="append")
-    
+    upload_df_to_table(project_id, dataset_id, table_id, update_df, mode="append")  
 
 def etl_weekly_domestic_performance_task(): 
     """
     Extracts, transforms, and loads weekly domestic performance data into a BigQuery table. (have yet to test with airflow)
     
     This function performs the following steps:
-    1. Retrieves the start date from the Airflow Variable named "START_DATE" & Extracts the year from the start date.
+    1. Retrieves the start date from the Airflow Variable named "START_DATE" & extracts the year from the start date.
     2. Calls the `get_update_batch_dataset` function to extract raw data from box office mojo (recent 4 weeks of data) and upload to gcs
     3. Calls the `clean_update_weekly_domestic_performance` function to clean the data (all boxofficemojo data - initialisation + update datasets) and return a DataFrame.
     4. Calls the `upload_df_to_table function` to upload the cleaned DataFrame to the specified BigQuery table, using the "truncate" mode.
@@ -91,13 +89,11 @@ def etl_weekly_domestic_performance_task():
     project_id = "is3107-418809"
     dataset_id = "movie_dataset"
     table_id = "weekly_domestic_performance"
-    start_date = Variable.get("START_DATE")
-    start_date_format = datetime.strptime(start_date, "%Y-%m-%d")
+    start_date = datetime.strptime(Variable.get("START_DATE"), '%Y-%m-%d %H:%M:%S')
     year = start_date.year
     get_update_batch_dataset(year)
     update_df = clean_update_weekly_domestic_performance(data_path='', return_df=True)
     upload_df_to_table(project_id, dataset_id, table_id, update_df, mode="truncate")
-
 
 
 # Airflow DAG
