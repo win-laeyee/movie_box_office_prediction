@@ -53,26 +53,26 @@ def dashboard():
     with col1:
         st.metric(
             label=":green[Highest Revenue]",
-            value=highest_revenue_movie['original_title'],
+            value=highest_revenue_movie['title'],
             delta="${:,.2f}".format(highest_revenue_movie['revenue']),
             delta_color="normal"
         )
         st.metric(
             label=":red[Lowest Revenue]",
-            value=lowest_revenue_movie['original_title'],
+            value=lowest_revenue_movie['title'],
             delta="${:,.2f}".format(lowest_revenue_movie['revenue']),
             delta_color="inverse"
         )
     with col2:
         st.metric(
             label=":green[Highest TMDB Vote Average]",
-            value=highest_vote_average_movie['original_title'],
+            value=highest_vote_average_movie['title'],
             delta="{:.1f}".format(highest_vote_average_movie['tmdb_vote_average']),
             delta_color="normal"
         )
         st.metric(
             label=":red[Lowest TMDB Vote Average] ",
-            value=lowest_vote_average_movie['original_title'],
+            value=lowest_vote_average_movie['title'],
             delta="{:.1f}".format(lowest_vote_average_movie['tmdb_vote_average']),
             delta_color="inverse"        
         )
@@ -80,13 +80,13 @@ def dashboard():
     with col3:
         st.metric(
             label=":green[Highest View Count]",
-            value=highest_view_count_movie['original_title'],
+            value=highest_view_count_movie['title'],
             delta="{:,.0f}".format(highest_view_count_movie['view_count']),
             delta_color="normal"
         )
         st.metric(
             label=":red[Lowest View Count]",
-            value=lowest_view_count_movie['original_title'],
+            value=lowest_view_count_movie['title'],
             delta="{:,.0f}".format(lowest_view_count_movie['view_count']),
             delta_color="inverse"
         )
@@ -326,7 +326,7 @@ def dashboard():
     st.markdown('<h3>Domestic vs. International Revenue</h3>', unsafe_allow_html=True)
     movie_weekly_performance = merge_movie_weekly_performance()
     movie_weekly_performance['international_revenue'] = movie_weekly_performance['revenue'] - movie_weekly_performance['domestic_gross']
-    df_long = movie_weekly_performance.melt(id_vars=['original_title'], 
+    df_long = movie_weekly_performance.melt(id_vars=['title'], 
                                             value_vars=['domestic_gross', 'international_revenue'], 
                                             var_name='Revenue Type', 
                                             value_name='Revenue')
@@ -341,16 +341,16 @@ def dashboard():
     filtered_df = filtered_df[(filtered_df['domestic_gross'] >= domestic_range[0]) & (filtered_df['domestic_gross'] <= domestic_range[1])]
     filtered_df = filtered_df[(filtered_df['international_revenue'] >= international_range[0]) & (filtered_df['international_revenue'] <= international_range[1])]
 
-    df_long_filtered = filtered_df.melt(id_vars=['original_title'], 
+    df_long_filtered = filtered_df.melt(id_vars=['title'], 
                                     value_vars=['domestic_gross', 'international_revenue'], 
                                     var_name='Revenue Type', 
                                     value_name='Revenue')
 
     chart = alt.Chart(df_long_filtered).mark_bar().encode(
-        x=alt.X('original_title:N', title="Movie Title"),
+        x=alt.X('title:N', title="Movie Title"),
         y=alt.Y('Revenue:Q', stack='zero'), 
         color='Revenue Type:N',
-        tooltip=['original_title', 'Revenue Type', 'Revenue']
+        tooltip=['title', 'Revenue Type', 'Revenue']
     ).properties(
         width=700,
         height=400
@@ -414,16 +414,16 @@ def dashboard():
         (video_stats_df['like_count'] >= like_range[0]) & (video_stats_df['like_count'] <= like_range[1]) &
         (video_stats_df['comment_count'] >= comment_range[0]) & (video_stats_df['comment_count'] <= comment_range[1])
     ]
-    df_long_filtered = filtered_movies.melt(id_vars='original_title', 
+    df_long_filtered = filtered_movies.melt(id_vars='title', 
                                             value_vars=['view_count', 'like_count', 'comment_count'], 
                                             var_name='Metric', 
                                             value_name='Count')
 
     audience_engagement_chart = alt.Chart(df_long_filtered).mark_bar().encode(
-        x=alt.X('original_title:N', title="Movie Title"),
+        x=alt.X('title:N', title="Movie Title"),
         y=alt.Y('Count:Q', stack=None), 
         color='Metric:N',
-        tooltip=['original_title', 'Metric', 'Count']
+        tooltip=['title', 'Metric', 'Count']
     ).properties(
         title='Audience Engagement Metrics by Movie'
     )

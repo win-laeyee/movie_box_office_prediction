@@ -10,6 +10,7 @@ def main():
 
     with tab2:
         input_fields()
+        
 
 if __name__ == "__main__":
     main()
