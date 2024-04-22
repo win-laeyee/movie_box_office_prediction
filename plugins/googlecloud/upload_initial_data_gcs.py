@@ -85,7 +85,7 @@ if __name__ == "__main__":
 
     try:
         #raw tmdb file (joanne)
-        str_directory = './historical_data/raw_historical_data/tmdb'
+        str_directory = './historical_data/raw_historical_data/tmdb_movie'
         directory = Path(str_directory)
         filenames = list([file.name for file in directory.glob('*.ndjson')])
         delete_many_blobs(bucket_name, filenames)
