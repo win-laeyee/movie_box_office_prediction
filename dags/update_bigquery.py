@@ -4,6 +4,7 @@ from airflow.operators.python import PythonOperator
 from airflow.models import Variable
 from googlecloud.upload_initial_data_bigquery import upload_df_to_table #type:ignore 
 from googlecloud.upload_new_data_bigquery import upsert_df_to_table #type:ignore
+from extraction.tmdb_movie.movie import get_movie_tmdb_details, clean_new_raw_movie_details #type:ignore
 from extraction.video_stats.clean_per_erd import clean_raw_video_statistics #type:ignore
 from extraction.video_stats.collection import extract_raw_video_stats #type:ignore
 from extraction.tmdb_collection.collection import collection_ids_to_update, get_collection_tmdb_details, clean_update_collections_details #type:ignore
