@@ -13,6 +13,7 @@ import requests
 from importlib import reload
 import concurrent.futures
 import json
+import shutil
 
 def get_tmdb_movie_id(start_release_date, end_release_date) -> pd.Series:
     
@@ -416,6 +417,11 @@ def get_movie_tmdb_details(start_release_date, end_release_date):
         delete_many_blobs(bucket_name, filenames)
         print(f"{filenames=}")
         upload_many_blobs_with_transfer_manager(bucket_name, filenames=filenames, source_directory=str_directory)
+         
+        #remove directory after upload
+        if os.path.exists(folder_path):
+            shutil.rmtree(folder_path)
+            
     except Exception as e:
         print(f"Error in uploading TMDB raw data to cloud storage \n Error details: {e}")
 
