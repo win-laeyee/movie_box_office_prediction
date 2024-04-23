@@ -64,17 +64,19 @@ def etl_tmdb_collection_task():
     
     This function performs the following steps:
     1. Calls the `collection_ids_to_update` function which compares the collection ids in movie bigquery table and collection bigquery table, returning a series of collection ids not in collection bigquery database
-    2. Calls the `get_collection_tmdb_details` function to extract raw data from tmdb collection api
-    3. Calls the `clean_update_collections_details` function to clean and transform the data and return a DataFrame.
-    4. Calls the `upload_df_to_table function` to upload the cleaned DataFrame to the specified BigQuery table, using the "append" mode.
+    2. If there are collection_ids to be appended to existing callection table
+        a. Calls the `get_collection_tmdb_details` function to extract raw data from tmdb collection api
+        b. Calls the `clean_update_collections_details` function to clean and transform the data and return a DataFrame.
+        c. Calls the `upload_df_to_table function` to upload the cleaned DataFrame to the specified BigQuery table, using the "append" mode.
     """
     project_id = "is3107-418809"
     dataset_id = "movie_dataset"
     table_id = "collection"
     collection_ids = collection_ids_to_update()
-    collection_results = get_collection_tmdb_details(collection_ids)
-    update_df = clean_update_collections_details(collection_results, save_file_path='', return_df=True)
-    upload_df_to_table(project_id, dataset_id, table_id, update_df, mode="append")  
+    if len(collection_ids) > 0:
+        collection_results = get_collection_tmdb_details(collection_ids)
+        update_df = clean_update_collections_details(collection_results, save_file_path='', return_df=True)
+        upload_df_to_table(project_id, dataset_id, table_id, update_df, mode="append")  
 
 def etl_weekly_domestic_performance_task(): 
     """
