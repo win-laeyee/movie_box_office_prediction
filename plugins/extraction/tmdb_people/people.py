@@ -13,6 +13,7 @@ from importlib import reload
 import concurrent.futures
 import json
 from datetime import date
+import shutil
 
 def get_initial_tmdb_people_id_bq() -> pd.Series: 
     """
@@ -260,3 +261,148 @@ def new_tmdb_people_id() -> pd.Series:
 
     return pd.Series(list(difference))
 
+def get_new_tmdb_people_details():
+    """
+    Retrieves people details for all people ids from TMDB API and upload to google cloud storage
+
+    Args:
+        file_path (str): The file path where the NDJSON file will be saved.
+
+    Returns:
+        list: A list of people details
+    """
+    people_ids = update_tmdb_people_id()
+    chunks_list = chunks(people_ids)
+    people_results = []
+
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        results = executor.map(people_info_chunks, chunks_list)
+
+    for result in results:
+        people_results = people_results + result
+        
+    #to keep a copy to google cloud storage
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    plugins_dir = os.path.dirname(os.path.dirname(script_dir))
+    interested_dir = os.path.join(plugins_dir, "/googlecloud")
+    
+    json_path = os.path.join(interested_dir, "is3107-418809-62c002a9f1f7.json")
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
+
+    file_path = os.path.join(os.path.dirname(plugins_dir), "historical_data") 
+    str_directory = os.path.join(file_path, 'update_data/tmdb_people')
+    
+    folder_path = str_directory
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+        
+    date_now = date.today().strftime('%Y%m%d')
+    filename = f"raw_people_{date_now}.ndjson"
+    
+    with open(os.path.join(folder_path, filename), "w") as ndjson_file:
+        ndjson_file.write('\n'.join(map(json.dumps, people_results)))
+        
+    try:   
+        bucket_name = "update_movies_tmdb"
+        directory = Path(folder_path)
+        filenames = list([file.name for file in directory.glob('*.ndjson')])
+        print(f"{filenames=}")
+        upload_many_blobs_with_transfer_manager(bucket_name, filenames=filenames, source_directory=str_directory)
+        
+        #remove directory after upload
+        if os.path.exists(folder_path):
+            shutil.rmtree(folder_path)
+            
+    except Exception as e:
+        print(f"Error in uploading TMDB raw data to cloud storage \n Error details: {e}")
+        
+    return people_results
+
+def clean_new_raw_people_details(people_details, save_file_path:str, return_df=False):
+    """
+    Cleans the raw people details from ndjson file and saves the cleaned results to a CSV file.
+
+    Args:
+        raw_file_path (str): The file path of the raw collection details NDJSON file.
+        save_file_path (str): The directory path where the cleaned CSV file will be saved.
+
+    Returns:
+        filepath (str) or dataframe (pd.Dataframe)
+    """
+    
+    people_results =  pd.DataFrame(people_details)
+    
+    people_info = pd.DataFrame()
+    
+    name_lst = []
+    bir_lst = []
+    gender_lst = []
+    pop = []
+    cast_credits = []
+    crew_credits = []
+    known = []
+    people_id = []
+    
+    for index, row in people_results.iterrows():
+        # Make the request
+        id_ = (int(row['id']))
+        people_id.append(id_)
+
+        try:
+            name = row['name']
+        except KeyError:
+            name = None
+        name_lst.append(name)
+        try:
+            birthday = row['birthday']
+        except KeyError:
+            birthday = None
+        bir_lst.append(birthday)
+        try:
+            gender = row['gender']
+        except KeyError:
+            gender = None
+        gender_lst.append(gender)
+        try:
+            tmdb_popularity = row['popularity']
+        except KeyError:
+            tmdb_popularity = None
+        pop.append(tmdb_popularity)
+        try:
+            known_for = row['known_for_department']
+        except KeyError:
+            known_for = None
+        known.append(known_for)
+        
+        # Number of credits
+        try:
+            cast_num = len(row['movie_credits']["cast"])
+        except KeyError:
+            cast_num = 0
+        cast_credits.append(cast_num)
+        try:
+            crew_num = len(row['movie_credits']["crew"])
+        except KeyError:
+            crew_num = 0
+        crew_credits.append(crew_num)
+
+    people_info['people_id'] = people_id
+    people_info['name'] = name_lst
+    people_info['birthday'] = bir_lst
+    people_info['gender'] = gender_lst
+    people_info['tmdb_popularity'] = pop
+    people_info['known_for'] = known
+    people_info['total_number_cast_credits'] = cast_credits
+    people_info['total_number_crew_credits'] = crew_credits
+    
+    # Convert birthday to Date
+    people_info['birthday'] = pd.to_datetime(people_info['birthday']).dt.date
+    
+    if not return_df:
+        folder_path = save_file_path
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+        cleaned_df.to_csv(os.path.join(folder_path, "cleaned_people_info.csv"), index=False)
+        return os.path.join(folder_path, "cleaned_people_info.csv")
+    else:
+        return people_info
