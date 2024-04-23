@@ -208,6 +208,9 @@ def clean_raw_people_details(save_file_path:str, return_df=False):
     people_info['total_number_cast_credits'] = cast_credits
     people_info['total_number_crew_credits'] = crew_credits
     
+    # Convert birthday to Date
+    people_info['birthday'] = pd.to_datetime(people_info['birthday']).dt.date
+    
     if not return_df:
         folder_path = save_file_path
         if not os.path.exists(folder_path):
