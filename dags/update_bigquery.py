@@ -28,8 +28,8 @@ def set_start_date_task(**context):
     """
     end_date = datetime.strptime(context.get('ds'), "%Y-%m-%d")
     start_date = end_date - relativedelta(weeks=1)
-    Variable.set(key="START_DATE", value=start_date)
-    Variable.set(key="END_DATE", value=end_date) 
+    Variable.set(key="START_DATE_RUN", value=start_date)
+    Variable.set(key="END_DATE_RUN", value=end_date) 
 
 def etl_tmdb_movie_task():
     # need to name movie blob by date interval (i.e. START_DATE)
@@ -38,7 +38,7 @@ def etl_tmdb_movie_task():
     project_id = "is3107-418809"
     dataset_id = "movie_dataset"
     table_id = "movie"
-    start_date, end_date = Variable.get("START_DATE").split(' ')[0], Variable.get("END_DATE").split(' ')[0]
+    start_date, end_date = Variable.get("START_DATE_RUN").split(' ')[0], Variable.get("END_DATE_RUN").split(' ')[0]
     get_movie_tmdb_details(start_date, end_date)
     df = clean_new_raw_movie_details('', return_df = True)
     upsert_df_to_table(project_id, dataset_id, table_id, ['movie_id'], df, staging_dataset_id="staging_dataset")
@@ -59,14 +59,14 @@ def etl_video_stats_task():
     project_id = "is3107-418809"
     dataset_id = "movie_dataset"
     table_id = "video_stats"
-    start_date, end_date = datetime.strptime(Variable.get("START_DATE"), '%Y-%m-%d %H:%M:%S'), datetime.strptime(Variable.get("END_DATE"), '%Y-%m-%d %H:%M:%S')
+    start_date, end_date = datetime.strptime(Variable.get("START_DATE_RUN"), '%Y-%m-%d %H:%M:%S'), datetime.strptime(Variable.get("END_DATE_RUN"), '%Y-%m-%d %H:%M:%S')
     extract_raw_video_stats(os.path.abspath("./raw_data"), start_date=start_date, end_date=end_date)
     df = clean_raw_video_statistics(save_file_path="", start_date=start_date, end_date=end_date, return_df=True)
     upsert_df_to_table(project_id, dataset_id, table_id, primary_key_columns=["movie_id"], df=df)
 
 def etl_tmdb_collection_task():
     """
-    Extracts, transforms, and loads by appending new collection data into a BigQuery table. (have yet to test with airflow)
+    Extracts, transforms, and loads by appending new collection data into a BigQuery table.
     
     This function performs the following steps:
     1. Calls the `collection_ids_to_update` function which compares the collection ids in movie bigquery table and collection bigquery table, returning a series of collection ids not in collection bigquery database
@@ -86,7 +86,7 @@ def etl_tmdb_collection_task():
 
 def etl_weekly_domestic_performance_task(): 
     """
-    Extracts, transforms, and loads weekly domestic performance data into a BigQuery table. (have yet to test with airflow)
+    Extracts, transforms, and loads weekly domestic performance data into a BigQuery table.
     
     This function performs the following steps:
     1. Retrieves the start date from the Airflow Variable named "START_DATE" & extracts the year from the start date.
@@ -97,7 +97,7 @@ def etl_weekly_domestic_performance_task():
     project_id = "is3107-418809"
     dataset_id = "movie_dataset"
     table_id = "weekly_domestic_performance"
-    start_date = datetime.strptime(Variable.get("START_DATE"), '%Y-%m-%d %H:%M:%S')
+    start_date = datetime.strptime(Variable.get("START_DATE_RUN"), '%Y-%m-%d %H:%M:%S')
     year = start_date.year
     get_update_batch_dataset(year)
     update_df = clean_update_weekly_domestic_performance(data_path='', return_df=True)
