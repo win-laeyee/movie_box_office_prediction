@@ -24,8 +24,7 @@ def get_tmdb_movie_id(start_release_date, end_release_date) -> pd.Series:
     }
     
     url = 'https://api.themoviedb.org/3/discover/movie?language=en-US&page=1&primary_release_date.gte=' \
-    + start_release_date + '&primary_release_date.lte=' + end_release_date + '&sort_by=primary_release_date.desc&with_release_type=3\
-    &with_origin_country=CA%7CUS%7CPR'
+    + start_release_date + '&primary_release_date.lte=' + end_release_date + '&sort_by=primary_release_date.desc&with_release_type=3'
     
     response = requests.get(url, headers=headers)
     data_dict = json.loads(response.text)
@@ -355,7 +354,7 @@ def movie_ids_to_update() -> pd.Series:
     
     return past_month_movie_ids_series
 
-def get_movie_tmdb_details(file_path, start_release_date, end_release_date):
+def get_movie_tmdb_details(start_release_date, end_release_date):
     """
     Retrieves movie details for all newly released movie ids from TMDB API and saves the results to a NDJSON file.
     
@@ -369,14 +368,15 @@ def get_movie_tmdb_details(file_path, start_release_date, end_release_date):
     Returns:
         None
     """
-    # Get details of newly released movies
-    get_initial_movie_tmdb_details(file_path, start_release_date, end_release_date)
-    upload_raw_initial_movie_tmdb_details_gcs()
+    # Get ids of newly released movies
+    new_movie_ids = get_tmdb_movie_id(start_release_date, end_release_date)
     
     # Get new details for past month movies
     reload(logging)
     past_month_movie_ids = movie_ids_to_update()
-    chunks_list = chunks(past_month_movie_ids)
+    movie_ids = pd.concat([new_movie_ids, past_month_movie_ids], axis = 0)
+    movie_ids = movie_ids.drop_duplicates() #Drop duplicates if any
+    chunks_list = chunks(movie_ids)
     movie_results = []
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -393,24 +393,24 @@ def get_movie_tmdb_details(file_path, start_release_date, end_release_date):
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
     
     file_path = os.path.join(os.path.dirname(plugins_dir), "historical_data") 
-    str_directory = os.path.join(file_path, 'update_data/tmdb_collection')
- 
-    folder_path = file_path
+    str_directory = os.path.join(file_path, 'update_data/tmdb_movie')
+
+    folder_path = str_directory
+    print(os.path.exists(folder_path))
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
 
-    update_date = end_release_date.replace('-', '')
-    filename = f"update_raw_movie_details_{update_date}.ndjson"
+    start_release_date = start_release_date.replace('-', '')
+    end_release_date = end_release_date.replace('-', '')
+    filename = f"update_raw_movie_details_{start_release_date}_{end_release_date}.ndjson"
 
     with open(os.path.join(folder_path, filename), "w") as ndjson_file:
         ndjson_file.write('\n'.join(map(json.dumps, movie_results)))
     
     print(os.path.join(folder_path, filename))
-    
+     
     try:   
         bucket_name = "update_movies_tmdb"
-        historicaldata_dir = os.path.join(os.path.dirname(plugins_dir), "historical_data") 
-        str_directory = os.path.join(historicaldata_dir, 'raw_historical_data/tmdb_movie')
         directory = Path(str_directory)
         filenames = list([file.name for file in directory.glob('*.ndjson')])
         delete_many_blobs(bucket_name, filenames)
@@ -420,20 +420,11 @@ def get_movie_tmdb_details(file_path, start_release_date, end_release_date):
         print(f"Error in uploading TMDB raw data to cloud storage \n Error details: {e}")
 
 def clean_new_raw_movie_details(save_file_path:str, return_df=False):
-    # Get new movies
-    bucket_name = "movies_tmdb"
-    filenames = list_blobs("movies_tmdb", prefix="raw_movie_details_20")
-    filenames.sort(key=lambda x: x.split('_')[-1].split('.')[0])
-    file_content_new = read_blob(bucket_name, filenames[-1])
-
-    # Get updated movies
+    # Get new and updated movies
     bucket_name = "update_movies_tmdb"
     filenames = list_blobs("update_movies_tmdb", prefix="update_raw_movie_details_")
     filenames.sort(key=lambda x: x.split('_')[-1].split('.')[0])
-    file_content_update = read_blob(bucket_name, filenames[-1])
-
-    movie_results = pd.concat([file_content_new, file_content_update], axis=0)
-
+    movie_results = read_blob(bucket_name, filenames[-1])
     selected_columns = ['budget', 'imdb_id', 'original_language', 'release_date',
                 'revenue', 'runtime', 'status']
 
