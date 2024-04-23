@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 sys.path.append(str(Path.cwd()))
 from extraction.boxoffice_api.boxoffice_app import BoxOffice 
-from googlecloud.upload_initial_data_gcs import delete_many_blobs, upload_many_blobs_with_transfer_manager
+from googlecloud.upload_initial_data_gcs import delete_many_blobs, upload_many_blobs_with_transfer_manager, upload_blob
 import os
 import logging
 from importlib import reload
@@ -107,8 +107,8 @@ def get_update_batch_dataset(year=int) -> pd.DataFrame:
 
         try:   
             bucket_name = "update_movies_tmdb"
-            filenames = list([f"update_boxofficemojo_{date_now}.csv"])
-            upload_many_blobs_with_transfer_manager(bucket_name, filenames=filenames, source_directory=str_directory)
+            filename = f"update_boxofficemojo_{date_now}.csv"
+            upload_blob(bucket_name, source_file_name = os.path.join(folder_path,filename), destination_blob_name=filename)
             #remove local directory after upload
             if os.path.exists(folder_path):
                 shutil.rmtree(folder_path)
