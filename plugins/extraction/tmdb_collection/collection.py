@@ -5,7 +5,7 @@ import numpy as np
 import os
 from datetime import date, datetime
 from googlecloud.read_data_gcs import read_blob, list_blobs
-from googlecloud.upload_initial_data_gcs import delete_many_blobs, upload_many_blobs_with_transfer_manager
+from googlecloud.upload_initial_data_gcs import delete_many_blobs, upload_many_blobs_with_transfer_manager, upload_blob
 from googlecloud.read_data_bigquery import load_data_from_table
 from dotenv import load_dotenv
 import logging
@@ -65,7 +65,7 @@ def collection_info_chunks(chunk:list):
         dict: A dictionary containing the collection ID as the key and the collection data as the value.
     """
     load_dotenv()
-    AUTHORIZATION = os.getenv("Authorization") 
+    AUTHORIZATION = os.getenv("AUTHORIZATION") 
     headers = {
         "accept": "application/json",
         "Authorization": AUTHORIZATION
@@ -239,10 +239,8 @@ def get_collection_tmdb_details(collection_ids):
 
     try:   
         bucket_name = "update_movies_tmdb"
-        directory = Path(folder_path)
-        filenames = list([file.name for file in directory.glob('*.json')])
-        print(f"{filenames=}")
-        upload_many_blobs_with_transfer_manager(bucket_name, filenames=filenames, source_directory=str_directory)
+        filename = f"update_raw_collection_data_{date_now}.json"
+        upload_blob(bucket_name, source_file_name = os.path.join(folder_path, filename), destination_blob_name=filename)
         #remove directory after upload
         if os.path.exists(folder_path):
             shutil.rmtree(folder_path)
