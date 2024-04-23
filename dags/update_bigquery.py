@@ -35,7 +35,13 @@ def etl_tmdb_movie_task():
     # need to name movie blob by date interval (i.e. START_DATE)
     # example: raw_movie_details_{START_DATE}_{END_DATE}.ndjson (raw_movie_details_20240403_20240410)
     # TODO: append + update (tracking changes API)
-    pass
+    project_id = "is3107-418809"
+    dataset_id = "movie_dataset"
+    table_id = "movie"
+    start_date, end_date = Variable.get("START_DATE").split(' ')[0], Variable.get("END_DATE").split(' ')[0]
+    get_movie_tmdb_details(start_date, end_date)
+    df = clean_new_raw_movie_details('', return_df = True)
+    upsert_df_to_table(project_id, dataset_id, table_id, ['movie_id'], df, staging_dataset_id="staging_dataset")
 
 def etl_tmdb_person_task():
     # TODO: append + update (tracking changes API)
