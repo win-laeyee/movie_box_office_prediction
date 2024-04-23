@@ -158,7 +158,7 @@ def clean_raw_people_details(save_file_path:str, return_df=False):
     
     for index, row in people_results.iterrows():
         # Make the request
-        id_ = str(int(row['id']))
+        id_ = (int(row['id']))
         people_id.append(id_)
 
         try:
