@@ -229,39 +229,35 @@ def new_tmdb_people_id() -> pd.Series:
         pd.Series: A pandas Series containing the unique new TMDB people IDs as integers.
     """
     query_people = '''
-    SELECT DISTINCT CAST(people_id as INT64) AS people_id FROM `is3107-418809.movie_dataset.people`
+    SELECT DISTINCT CAST(people_id as INT64) AS people_id FROM `is3107-418809.test_movie_dataset.people`
     '''
     
     old_people = load_data_from_table(query_people)
-    old_people_set = set(old_people)
+    old_people_set = set(old_people['people_id'])
     
+    # Replace with actual dataset later
     query_new_people = '''
-    WITH latest_insertion AS (
-        SELECT MAX(insertion_datetime) as latest_insertion_datetime
-        FROM `is3107-418809.movie_dataset.movie`
-    )
-    
-    SELECT DISTINCT CAST(cast1_id AS INT64) AS people_id FROM `is3107-418809.movie_dataset.movie`
-    WHERE cast1_id IS NOT NULL AND insertion_datetime = (SELECT latest_insertion_datetime FROM latest_insertion)
+    SELECT DISTINCT CAST(cast1_id AS INT64) AS people_id FROM `is3107-418809.test_movie_dataset.movie`
+    WHERE cast1_id IS NOT NULL
     UNION DISTINCT
-    SELECT DISTINCT CAST(cast2_id AS INT64) AS people_id FROM `is3107-418809.movie_dataset.movie`
-    WHERE cast2_id IS NOT NULL AND insertion_datetime = (SELECT latest_insertion_datetime FROM latest_insertion)
+    SELECT DISTINCT CAST(cast2_id AS INT64) AS people_id FROM `is3107-418809.test_movie_dataset.movie`
+    WHERE cast2_id IS NOT NULL
     UNION DISTINCT
-    SELECT DISTINCT CAST(director_id AS INT64) AS people_id FROM `is3107-418809.movie_dataset.movie`
-    WHERE director_id IS NOT NULL AND insertion_datetime = (SELECT latest_insertion_datetime FROM latest_insertion)
+    SELECT DISTINCT CAST(director_id AS INT64) AS people_id FROM `is3107-418809.test_movie_dataset.movie`
+    WHERE director_id IS NOT NULL
     UNION DISTINCT
-    SELECT DISTINCT CAST(producer_id AS INT64) AS people_id FROM `is3107-418809.movie_dataset.movie`
-    WHERE producer_id IS NOT NULL AND insertion_datetime = (SELECT latest_insertion_datetime FROM latest_insertion);
+    SELECT DISTINCT CAST(producer_id AS INT64) AS people_id FROM `is3107-418809.test_movie_dataset.movie`
+    WHERE producer_id IS NOT NULL
     '''
     
     new_people = load_data_from_table(query_new_people)
-    new_people_set = set(new_people)
+    new_people_set = set(new_people['people_id'])
     
-    difference = old_people_set - new_people_set
+    difference = new_people_set.difference(old_people_set)
 
     return pd.Series(list(difference))
 
-def get_new_tmdb_people_details():
+def get_tmdb_people_details():
     """
     Retrieves people details for all people ids from TMDB API and upload to google cloud storage
 
@@ -271,7 +267,7 @@ def get_new_tmdb_people_details():
     Returns:
         list: A list of people details
     """
-    people_ids = update_tmdb_people_id()
+    people_ids = new_tmdb_people_id()
     chunks_list = chunks(people_ids)
     people_results = []
 
@@ -297,7 +293,7 @@ def get_new_tmdb_people_details():
         os.makedirs(folder_path)
         
     date_now = date.today().strftime('%Y%m%d')
-    filename = f"raw_people_{date_now}.ndjson"
+    filename = f"update_raw_people_{date_now}.ndjson"
     
     with open(os.path.join(folder_path, filename), "w") as ndjson_file:
         ndjson_file.write('\n'.join(map(json.dumps, people_results)))
@@ -402,7 +398,7 @@ def clean_new_raw_people_details(people_details, save_file_path:str, return_df=F
         folder_path = save_file_path
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
-        cleaned_df.to_csv(os.path.join(folder_path, "cleaned_people_info.csv"), index=False)
+        people_info.to_csv(os.path.join(folder_path, "cleaned_people_info.csv"), index=False)
         return os.path.join(folder_path, "cleaned_people_info.csv")
     else:
         return people_info
