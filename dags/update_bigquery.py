@@ -5,6 +5,7 @@ from airflow.models import Variable
 from googlecloud.upload_initial_data_bigquery import upload_df_to_table #type:ignore 
 from googlecloud.upload_new_data_bigquery import upsert_df_to_table #type:ignore
 from extraction.tmdb_movie.movie import get_movie_tmdb_details, clean_new_raw_movie_details #type:ignore
+from plugins.extraction.tmdb_people.people import get_tmdb_people_details, clean_new_raw_people_details #type:ignore
 from extraction.video_stats.clean_per_erd import clean_raw_video_statistics #type:ignore
 from extraction.video_stats.collection import extract_raw_video_stats #type:ignore
 from extraction.tmdb_collection.collection import collection_ids_to_update, get_collection_tmdb_details, clean_update_collections_details #type:ignore
@@ -46,7 +47,12 @@ def etl_tmdb_movie_task():
 
 def etl_tmdb_person_task():
     # TODO: append + update (tracking changes API)
-    pass
+    project_id = "is3107-418809"
+    dataset_id = "movie_dataset"
+    table_id = "people"
+    people_details = get_tmdb_people_details() #TODO: get id of people who are changed
+    df = clean_new_raw_people_details(people_details, '', return_df = True)
+    upsert_df_to_table(project_id, dataset_id, table_id, ['people_id'], df, staging_dataset_id="staging_dataset")
 
 def etl_video_stats_task():
     """
