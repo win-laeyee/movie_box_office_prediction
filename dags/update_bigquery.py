@@ -40,7 +40,8 @@ def etl_tmdb_movie_task():
     project_id = "is3107-418809"
     dataset_id = "movie_dataset"
     table_id = "movie"
-    start_date, end_date = Variable.get("START_DATE_RUN").split(' ')[0], Variable.get("END_DATE_RUN").split(' ')[0]
+    start_date = (datetime.strptime(Variable.get("START_DATE_RUN"), '%Y-%m-%d %H:%M:%S') - relativedelta(months=3)).strftime('%Y-%m-%d')
+    end_date = (datetime.strptime(Variable.get("END_DATE_RUN"), '%Y-%m-%d %H:%M:%S') - relativedelta(months=3)).strftime('%Y-%m-%d')
     get_movie_tmdb_details(start_date, end_date)
     df = clean_new_raw_movie_details('', return_df = True)
     upsert_df_to_table(project_id, dataset_id, table_id, ['movie_id'], df, staging_dataset_id="staging_dataset")
