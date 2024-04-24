@@ -9,7 +9,7 @@ from plugins.extraction.tmdb_people.people import get_tmdb_people_details, clean
 from extraction.video_stats.clean_per_erd import clean_raw_video_statistics #type:ignore
 from extraction.video_stats.collection import extract_raw_video_stats #type:ignore
 from extraction.tmdb_collection.collection import collection_ids_to_update, get_collection_tmdb_details, clean_update_collections_details #type:ignore
-from extraction.boxoffice_api.boxoffice_func import get_update_batch_dataset #type:ignore
+from extraction.boxoffice_api.boxoffice_func import get_update_batch_dataset, get_update_batch_dataset_by_week #type:ignore
 from extraction.boxoffice_api.boxoffice_clean_per_erd import clean_update_weekly_domestic_performance #type:ignore
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
@@ -106,8 +106,10 @@ def etl_weekly_domestic_performance_task():
     dataset_id = "movie_dataset"
     table_id = "weekly_domestic_performance"
     start_date = datetime.strptime(Variable.get("START_DATE_RUN"), '%Y-%m-%d %H:%M:%S')
+    week = start_date.isocalendar()[1]
     year = start_date.year
-    get_update_batch_dataset(year)
+    #get_update_batch_dataset(year)
+    get_update_batch_dataset_by_week(week, year)
     update_df = clean_update_weekly_domestic_performance(data_path='', return_df=True)
     upload_df_to_table(project_id, dataset_id, table_id, update_df, mode="truncate")
 
