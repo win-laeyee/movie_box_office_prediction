@@ -24,7 +24,7 @@ logs/
 test.py
 
 # Ignore secrets
-googlecloud/is3107-418809-62c002a9f1f7.json
+**/googlecloud/is3107-418809-62c002a9f1f7.json
 secrets/
 .streamlit/
 
