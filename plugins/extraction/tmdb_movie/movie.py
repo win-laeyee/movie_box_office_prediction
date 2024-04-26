@@ -5,7 +5,7 @@ import numpy as np
 import os
 from datetime import date, datetime
 from googlecloud.read_data_gcs import read_blob, list_blobs
-from googlecloud.upload_initial_data_gcs import delete_many_blobs, upload_many_blobs_with_transfer_manager
+from googlecloud.upload_initial_data_gcs import delete_many_blobs, upload_many_blobs_with_transfer_manager, upload_blob
 from googlecloud.read_data_bigquery import load_data_from_table
 from dotenv import load_dotenv
 import logging
@@ -13,7 +13,6 @@ import requests
 from importlib import reload
 import concurrent.futures
 import json
-import shutil
 
 def get_tmdb_movie_id(start_release_date, end_release_date) -> pd.Series:
     
@@ -21,14 +20,16 @@ def get_tmdb_movie_id(start_release_date, end_release_date) -> pd.Series:
     AUTHORIZATION = os.getenv("AUTHORIZATION") 
     headers = {
         "accept": "application/json",
-        "Authorization": AUTHORIZATION
+        "Authorization": f"Bearer {AUTHORIZATION}"
     }
     
+    print(AUTHORIZATION)
     url = 'https://api.themoviedb.org/3/discover/movie?language=en-US&page=1&primary_release_date.gte=' \
     + start_release_date + '&primary_release_date.lte=' + end_release_date + '&sort_by=primary_release_date.desc&with_release_type=3'
     
     response = requests.get(url, headers=headers)
     data_dict = json.loads(response.text)
+    print(data_dict)
     
     # Extract 'id' from 'results'
     ids = pd.DataFrame.from_dict(data_dict['results'])[['id']]
@@ -86,7 +87,7 @@ def movie_info_chunks(chunk:list):
     AUTHORIZATION = os.getenv("AUTHORIZATION") 
     headers = {
         "accept": "application/json",
-        "Authorization": AUTHORIZATION
+        "Authorization": f"Bearer {AUTHORIZATION}"
     }
     logging.info("Start Thread")
     responses = []
@@ -138,7 +139,7 @@ def upload_raw_initial_movie_tmdb_details_gcs():
     script_dir = os.path.dirname(os.path.realpath(__file__))
     plugins_dir = os.path.dirname(os.path.dirname(script_dir))
     interested_dir = os.path.join(plugins_dir, "/googlecloud")
-    json_path = os.path.join(interested_dir, "is3107-418809-62c002a9f1f7.json")
+    json_path = os.path.join(interested_dir, "is3107-418809-92db84ea97f6.json")
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
 
     bucket_name = "movies_tmdb"
@@ -302,7 +303,7 @@ def clean_raw_movie_details(save_file_path:str, return_df=False):
     AUTHORIZATION = os.getenv("AUTHORIZATION") 
     headers = {
         "accept": "application/json",
-        "Authorization": AUTHORIZATION
+        "Authorization": f"Bearer {AUTHORIZATION}"
     }
 
     lang_response = requests.get(lang_url, headers=headers)
@@ -326,6 +327,7 @@ def clean_raw_movie_details(save_file_path:str, return_df=False):
                         'runtime', 'status', 'production_companies_count', 'is_adult', 'is_adaptation',
                          'collection_id', 'cast1_id', 'cast2_id', 'director_id', 'producer_id', 'tmdb_popularity',
                          'tmdb_vote_average', 'tmdb_vote_count', 'video_key_id']]
+    
     if not return_df:
         folder_path = save_file_path
         if not os.path.exists(folder_path):
@@ -390,7 +392,7 @@ def get_movie_tmdb_details(start_release_date, end_release_date):
     script_dir = os.path.dirname(os.path.realpath(__file__))
     plugins_dir = os.path.dirname(os.path.dirname(script_dir))
     interested_dir = os.path.join(plugins_dir, "/googlecloud")
-    json_path = os.path.join(interested_dir, "is3107-418809-62c002a9f1f7.json")
+    json_path = os.path.join(interested_dir, "is3107-418809-92db84ea97f6.json")
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
     
     file_path = os.path.join(os.path.dirname(plugins_dir), "historical_data") 
@@ -416,11 +418,9 @@ def get_movie_tmdb_details(start_release_date, end_release_date):
         filenames = list([file.name for file in directory.glob('*.ndjson')])
         delete_many_blobs(bucket_name, filenames)
         print(f"{filenames=}")
-        upload_many_blobs_with_transfer_manager(bucket_name, filenames=filenames, source_directory=str_directory)
-         
-        #remove directory after upload
-        if os.path.exists(folder_path):
-            shutil.rmtree(folder_path)
+        for filename in filenames:
+            upload_blob(bucket_name, os.path.join(directory, filename), filename)
+        # upload_many_blobs_with_transfer_manager(bucket_name, filenames=filenames, source_directory=str_directory)
             
     except Exception as e:
         print(f"Error in uploading TMDB raw data to cloud storage \n Error details: {e}")
@@ -555,7 +555,7 @@ def clean_new_raw_movie_details(save_file_path:str, return_df=False):
     AUTHORIZATION = os.getenv("AUTHORIZATION") 
     headers = {
         "accept": "application/json",
-        "Authorization": AUTHORIZATION
+        "Authorization": f"Bearer {AUTHORIZATION}"
     }
 
     lang_response = requests.get(lang_url, headers=headers)

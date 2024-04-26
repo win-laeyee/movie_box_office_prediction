@@ -9,7 +9,7 @@ from google.cloud.storage import Client, transfer_manager
 def upload_blob(bucket_name, source_file_name, destination_blob_name):
     """Uploads a file to the Google Cloud Storage bucket."""
     script_dir = os.path.dirname(os.path.realpath(__file__))
-    json_path = os.path.join(script_dir, "is3107-418809-62c002a9f1f7.json")
+    json_path = os.path.join(script_dir, "is3107-418809-92db84ea97f6.json")
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
     
     # Initialize a client
@@ -35,7 +35,7 @@ def upload_many_blobs_with_transfer_manager(bucket_name, filenames, source_direc
     transfer_manager.upload_many() instead.
     """
     script_dir = os.path.dirname(os.path.realpath(__file__))
-    json_path = os.path.join(script_dir, "is3107-418809-62c002a9f1f7.json")
+    json_path = os.path.join(script_dir, "is3107-418809-92db84ea97f6.json")
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
 
     storage_client = Client()
@@ -56,7 +56,7 @@ def upload_many_blobs_with_transfer_manager(bucket_name, filenames, source_direc
 def delete_many_blobs(bucket_name, blob_names):
     """Deletes multiple blobs from the bucket."""
     script_dir = os.path.dirname(os.path.realpath(__file__))
-    json_path = os.path.join(script_dir, "is3107-418809-62c002a9f1f7.json")
+    json_path = os.path.join(script_dir, "is3107-418809-92db84ea97f6.json")
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
 
     storage_client = storage.Client()
@@ -75,7 +75,7 @@ def delete_many_blobs(bucket_name, blob_names):
 if __name__ == "__main__":
     # Set the path to your service account key file
     script_dir = os.path.dirname(os.path.realpath(__file__))
-    json_path = os.path.join(script_dir, "is3107-418809-62c002a9f1f7.json")
+    json_path = os.path.join(script_dir, "is3107-418809-92db84ea97f6.json")
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
 
     bucket_name = "movies_tmdb"

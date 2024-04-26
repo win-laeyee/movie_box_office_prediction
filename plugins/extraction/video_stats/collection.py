@@ -8,8 +8,9 @@ from tqdm import tqdm
 from datetime import datetime
 from dotenv import load_dotenv
 from googlecloud.read_data_gcs import read_blob, list_blobs
-from googlecloud.upload_initial_data_gcs import upload_many_blobs_with_transfer_manager
+from googlecloud.upload_initial_data_gcs import upload_many_blobs_with_transfer_manager, upload_blob
 from googleapiclient.discovery import build
+from airflow.exceptions import AirflowNotFoundException
 
 
 def get_video_keys_gcs(start_date: datetime, end_date: datetime) -> pd.DataFrame:
@@ -19,8 +20,12 @@ def get_video_keys_gcs(start_date: datetime, end_date: datetime) -> pd.DataFrame
     Returns:
         pd.DataFrame: Pandas DataFrame containing the video keys (and details) needed to call YouTube/Vimeo APIs.
     """
-    bucket_name = "movies_tmdb"
-    filenames = list_blobs("movies_tmdb", prefix=f"raw_movie_details_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}")
+    bucket_name = "update_movies_tmdb"
+    print(f"update_raw_movie_details_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}")
+    filenames = list_blobs("update_movies_tmdb", prefix=f"update_raw_movie_details_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}")
+    if not filenames:
+        raise AirflowNotFoundException("Update movie details raw JSON files not found!")
+    
     df = pd.DataFrame()
     for filename in tqdm(filenames):
         file_content = read_blob(bucket_name, filename)[["id", "videos"]].rename(columns={"id": "movie_id"})
@@ -123,9 +128,10 @@ def get_vimeo_video_stats(keys: list) -> list:
 def extract_raw_video_stats(raw_file_dir: str, start_date: datetime, end_date: datetime):
     """
     Cleans the raw movie details from ndjson files and saves the cleaned results after extracting video details into a CSV file.
-
+    Upload the CSV file into Google Cloud Storage.
+    
     Args:
-        raw_file_dir (str): The absolute directory path where the raw collection details JSON file will be saved.
+        raw_file_dir (str): The absolute directory path where the raw collection details CSV file will be saved.
         start_date (datetime): Datetime object of start date from which to filter.
         end_date (datetime): Datetime object of end date to which to filter.
 
@@ -139,19 +145,27 @@ def extract_raw_video_stats(raw_file_dir: str, start_date: datetime, end_date: d
     vimeo_video_keys = video_key_df[video_key_df["site"] == "Vimeo"]["key"]
     youtube_video_keys = video_key_df[video_key_df["site"] == "YouTube"]["key"]
     
+    # create raw file storage directory if not exists
+    if not os.path.exists(raw_file_dir):
+        os.makedirs(raw_file_dir)
+
     # fetch vimeo data
     vimeo_results = get_vimeo_video_stats(vimeo_video_keys)
-    vimeo_df = pd.DataFrame(vimeo_results)
-    vimeo_df.to_csv(os.path.join(raw_file_dir, f"raw_vimeo_video_stats_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}.csv"), index=False)
+    if vimeo_results:
+        vimeo_df = pd.DataFrame(vimeo_results)
+        vimeo_df.to_csv(os.path.join(raw_file_dir, f"raw_vimeo_video_stats_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}.csv"), index=False)
 
     # fetch youtube data
     youtube_chunks_list = chunks(youtube_video_keys)
     youtube_results = []
     for chunk in youtube_chunks_list:
-        youtube_results.extend(get_youtube_video_stats(chunk))
-    youtube_df = pd.DataFrame(youtube_results)
-    youtube_df.to_csv(os.path.join(raw_file_dir, f"raw_youtube_video_stats_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}.csv"), index=False)
+        youtube_results.extend(get_youtube_video_stats(chunk.tolist()))
+    if youtube_results:
+        youtube_statistics = [{"id": result["id"], **result["statistics"]} for result in youtube_results]
+        youtube_df = pd.DataFrame(youtube_statistics)
+        youtube_df.to_csv(os.path.join(raw_file_dir, f"raw_youtube_video_stats_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}.csv"), index=False)
 
     # upload to gcs
     filenames = list([file.name for file in Path(raw_file_dir).glob(f"raw_*_video_stats_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}.csv")])
-    upload_many_blobs_with_transfer_manager("movies_tmdb", filenames=filenames, source_directory=raw_file_dir)
+    for filename in filenames:
+        upload_blob("update_movies_tmdb", os.path.join(Path(raw_file_dir), filename), filename)

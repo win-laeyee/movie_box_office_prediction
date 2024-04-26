@@ -24,7 +24,7 @@ logs/
 test.py
 
 # Ignore secrets
-googlecloud/is3107-418809-62c002a9f1f7.json
+**/googlecloud/is3107-418809-92db84ea97f6.json
 secrets/
 .streamlit/
 
@@ -33,4 +33,7 @@ secrets/
 
 # Ignore raw_movie_details related ndjson 
 historical_data/raw_historical_data/tmdb/*.ndjson
+
+# Ignore update data
+historical_data/update_data/*
 

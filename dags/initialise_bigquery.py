@@ -61,7 +61,8 @@ def etl_video_stats_task():
     project_id = "is3107-418809"
     dataset_id = "movie_dataset"
     table_id = "video_stats"
-    df = clean_raw_video_statistics('', return_df = True)
+    df = clean_raw_video_statistics('', return_df = True) # ==> Returns ~30k rows
+    # df = clean_raw_video_statistics_from_table('', return_df = True) # ==> Returns ~4k rows
     upload_df_to_table(project_id, dataset_id, table_id, df, mode="truncate")
 
 def etl_tmdb_collection_task():

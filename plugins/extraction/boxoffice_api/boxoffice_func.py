@@ -93,7 +93,7 @@ def get_update_batch_dataset(year=int) -> pd.DataFrame:
         script_dir = os.path.dirname(os.path.realpath(__file__))
         plugins_dir = os.path.dirname(os.path.dirname(script_dir))
         interested_dir = os.path.join(plugins_dir, "/googlecloud")
-        json_path = os.path.join(interested_dir, "is3107-418809-62c002a9f1f7.json")
+        json_path = os.path.join(interested_dir, "is3107-418809-92db84ea97f6.json")
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
 
         file_path = os.path.join(os.path.dirname(plugins_dir), "historical_data") 
@@ -108,6 +108,64 @@ def get_update_batch_dataset(year=int) -> pd.DataFrame:
         try:   
             bucket_name = "update_movies_tmdb"
             filename = f"update_boxofficemojo_{date_now}.csv"
+            upload_blob(bucket_name, source_file_name = os.path.join(folder_path,filename), destination_blob_name=filename)
+            #remove local directory after upload
+            if os.path.exists(folder_path):
+                shutil.rmtree(folder_path)
+        except Exception as e:
+            print(f"Error in uploading weekly domestic performance data to cloud storage \n Error details: {e}")
+
+        return df
+    else:
+        raise ValueError("Start Year or End Year provided not Valid")
+    
+
+def get_update_batch_dataset_by_week(week=int, year=int) -> pd.DataFrame:
+    #configuration
+    reload(logging)
+    logging.basicConfig(level=logging.INFO)
+
+    # note that 1 year has 52 weeks
+    start_year = year
+    end_year = year
+    box_office_obj = BoxOffice(outputformat="DF")
+    df = pd.DataFrame()
+    now_year = datetime.now().year
+    now_week = datetime.now().isocalendar()[1] #get until now week - 2: ensure there's data)
+
+    weeks_array = np.concatenate((weeks_str(), weeks_str()))
+    year_array = np.concatenate((np.repeat(year-1, 52), np.repeat(year, 52)))
+    week_end_index = week + 52 - 1 - 2
+    week_start_index = week + 52 - 6
+    
+    if start_year <= now_year and end_year <= now_year:
+        logging.info(f"Start Data Extraction")
+
+        for i in range(week_start_index, week_end_index+1):
+            logging.info(f"{year_array[i]=}; {weeks_array[i]=}")
+            df = pd.concat([df, data_by_year_week(box_office_obj, year_array[i], weeks_array[i])], axis=0)
+                    
+        logging.info(f"End Data Extraction")
+    
+        #upload copy to gcs
+        script_dir = os.path.dirname(os.path.realpath(__file__))
+        plugins_dir = os.path.dirname(os.path.dirname(script_dir))
+        interested_dir = os.path.join(plugins_dir, "/googlecloud")
+        json_path = os.path.join(interested_dir, "is3107-418809-92db84ea97f6.json")
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
+
+        file_path = os.path.join(os.path.dirname(plugins_dir), "historical_data") 
+        str_directory = os.path.join(file_path, 'update_data/boxofficemojo')
+    
+        folder_path = str_directory
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+        date_now = datetime.now().date()
+        df.to_csv(os.path.join(folder_path, f"update_boxofficemojo_{week}_{year}.csv"), index=False)
+
+        try:   
+            bucket_name = "update_movies_tmdb"
+            filename = f"update_boxofficemojo_{week}_{year}.csv"
             upload_blob(bucket_name, source_file_name = os.path.join(folder_path,filename), destination_blob_name=filename)
             #remove local directory after upload
             if os.path.exists(folder_path):

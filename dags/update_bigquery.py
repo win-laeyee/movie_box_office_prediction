@@ -3,59 +3,56 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.models import Variable
 from googlecloud.upload_initial_data_bigquery import upload_df_to_table #type:ignore 
-from googlecloud.upload_new_data_bigquery import upsert_df_to_table #type:ignore
+from googlecloud.upload_new_data_bigquery import upsert_df_to_table, update_df_to_table #type:ignore
 from extraction.tmdb_movie.movie import get_movie_tmdb_details, clean_new_raw_movie_details #type:ignore
-from plugins.extraction.tmdb_people.people import get_tmdb_people_details, clean_new_raw_people_details #type:ignore
+from extraction.tmdb_people.people import get_tmdb_people_details, clean_new_raw_people_details, clean_updated_people_details #type:ignore
 from extraction.video_stats.clean_per_erd import clean_raw_video_statistics #type:ignore
 from extraction.video_stats.collection import extract_raw_video_stats #type:ignore
 from extraction.tmdb_collection.collection import collection_ids_to_update, get_collection_tmdb_details, clean_update_collections_details #type:ignore
-from extraction.boxoffice_api.boxoffice_func import get_update_batch_dataset #type:ignore
+from extraction.boxoffice_api.boxoffice_func import get_update_batch_dataset, get_update_batch_dataset_by_week #type:ignore
 from extraction.boxoffice_api.boxoffice_clean_per_erd import clean_update_weekly_domestic_performance #type:ignore
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
 # at the start of each month, new data is to be ingested into gcs, then transformed and loaded into bigquery
 
-def set_start_date_task(**context):
-    """
-    Sets run variables for start date and end date. Downstream tasks should update data with datetimes >= start_date
-    and < end_date. END_DATE is defined as the start date of the DAG data interval, START_DATE is the date one month 
-    before END_DATE. 
-
-    For example, if DAG starts on 08/04/2024 00:00, START_DATE is 01/04/2024 00:00 and END_DATE is 08/04/2024 00:00.
-    To get date variables, use `Variable.get("START_DATE")` or `Variable.get("END_DATE")`.
-
-    Args:
-        context (tuple): Kwargs contain DAG run context parameters.
-    """
+def etl_tmdb_movie_task(**context):
+    # initialize start and end dates
     end_date = datetime.strptime(context.get('ds'), "%Y-%m-%d")
     start_date = end_date - relativedelta(weeks=1)
-    Variable.set(key="START_DATE_RUN", value=start_date)
-    Variable.set(key="END_DATE_RUN", value=end_date) 
 
-def etl_tmdb_movie_task():
-    # need to name movie blob by date interval (i.e. START_DATE)
-    # example: raw_movie_details_{START_DATE}_{END_DATE}.ndjson (raw_movie_details_20240403_20240410)
-    # TODO: append + update (tracking changes API)
     project_id = "is3107-418809"
     dataset_id = "movie_dataset"
     table_id = "movie"
-    start_date = (datetime.strptime(Variable.get("START_DATE_RUN"), '%Y-%m-%d %H:%M:%S') - relativedelta(months=3)).strftime('%Y-%m-%d')
-    end_date = (datetime.strptime(Variable.get("END_DATE_RUN"), '%Y-%m-%d %H:%M:%S') - relativedelta(months=3)).strftime('%Y-%m-%d')
+    start_date = (start_date - relativedelta(months=3)).strftime('%Y-%m-%d')
+    end_date = (end_date - relativedelta(months=3)).strftime('%Y-%m-%d')
     get_movie_tmdb_details(start_date, end_date)
     df = clean_new_raw_movie_details('', return_df = True)
     upsert_df_to_table(project_id, dataset_id, table_id, ['movie_id'], df, staging_dataset_id="staging_dataset")
 
-def etl_tmdb_person_task():
-    # TODO: append + update (tracking changes API)
+def etl_tmdb_person_task(**context):
+     # initialize start and end dates
+    end_date = datetime.strptime(context.get('ds'), "%Y-%m-%d")
+    start_date = end_date - relativedelta(weeks=1)
+
     project_id = "is3107-418809"
     dataset_id = "movie_dataset"
     table_id = "people"
-    people_details = get_tmdb_people_details() #TODO: get id of people who are changed
-    df = clean_new_raw_people_details(people_details, '', return_df = True)
-    upsert_df_to_table(project_id, dataset_id, table_id, ['people_id'], df, staging_dataset_id="staging_dataset")
+    
+    new_people_details, updated_people_details = get_tmdb_people_details(start_date, end_date)
 
-def etl_video_stats_task():
+    # New people details in the past week
+    new_df = clean_new_raw_people_details(new_people_details, '', return_df = True)
+    print(new_df)
+    if len(new_df) > 0:
+        upsert_df_to_table(project_id, dataset_id, table_id, ['people_id'], new_df, staging_dataset_id="staging_dataset")
+
+    # Updated people details in the past week
+    changes_df = clean_updated_people_details(updated_people_details, save_file_path="", return_df=True)
+    if len(changes_df) > 0:
+        update_df_to_table(project_id, dataset_id, table_id, ['people_id'], changes_df, staging_dataset_id="staging_dataset")
+
+def etl_video_stats_task(**context):
     """
     Extracts, transforms and loads video statistics data into a BigQuery table.
 
@@ -64,13 +61,21 @@ def etl_video_stats_task():
     2. Calls the `clean_raw_video_statistics` function to clean the raw video statistics data retrieved from gcs.
     3. Calls the `upsert_df_to_table` function to upsert the cleaned data to the BigQuery collection table.
     """
+    # initialize start and end dates
+    end_date = datetime.strptime(context.get('ds'), "%Y-%m-%d")
+    start_date = end_date - relativedelta(weeks=1)
+
+    # standardize time period with etl_movie_task
+    start_date = start_date - relativedelta(months=3)
+    end_date = end_date - relativedelta(months=3)
+
     project_id = "is3107-418809"
     dataset_id = "movie_dataset"
-    table_id = "video_stats"
-    start_date, end_date = datetime.strptime(Variable.get("START_DATE_RUN"), '%Y-%m-%d %H:%M:%S'), datetime.strptime(Variable.get("END_DATE_RUN"), '%Y-%m-%d %H:%M:%S')
-    extract_raw_video_stats(os.path.abspath("./raw_data"), start_date=start_date, end_date=end_date)
-    df = clean_raw_video_statistics(save_file_path="", start_date=start_date, end_date=end_date, return_df=True)
-    upsert_df_to_table(project_id, dataset_id, table_id, primary_key_columns=["movie_id"], df=df)
+    table_id = "video_stats"    
+    extract_raw_video_stats(os.path.abspath("./historical_data/update_data/video_stats"), start_date=start_date, end_date=end_date)
+    df = clean_raw_video_statistics(save_file_path="", start_date=start_date, end_date=end_date, return_df=True, bucket_name="update_movies_tmdb")
+    if len(df) > 0:
+        upsert_df_to_table(project_id, dataset_id, table_id, primary_key_columns=["movie_id", "video_key_id"], df=df)
 
 def etl_tmdb_collection_task():
     """
@@ -92,7 +97,7 @@ def etl_tmdb_collection_task():
         update_df = clean_update_collections_details(collection_results, save_file_path='', return_df=True)
         upload_df_to_table(project_id, dataset_id, table_id, update_df, mode="append")  
 
-def etl_weekly_domestic_performance_task(): 
+def etl_weekly_domestic_performance_task(**context): 
     """
     Extracts, transforms, and loads weekly domestic performance data into a BigQuery table.
     
@@ -102,12 +107,17 @@ def etl_weekly_domestic_performance_task():
     3. Calls the `clean_update_weekly_domestic_performance` function to clean the data (all boxofficemojo data - initialisation + update datasets) and return a DataFrame.
     4. Calls the `upload_df_to_table function` to upload the cleaned DataFrame to the specified BigQuery table, using the "truncate" mode.
     """
+    # initialize start and end dates
+    end_date = datetime.strptime(context.get('ds'), "%Y-%m-%d")
+    start_date = end_date - relativedelta(weeks=1)
+
     project_id = "is3107-418809"
     dataset_id = "movie_dataset"
     table_id = "weekly_domestic_performance"
-    start_date = datetime.strptime(Variable.get("START_DATE_RUN"), '%Y-%m-%d %H:%M:%S')
+    week = start_date.isocalendar()[1]
     year = start_date.year
-    get_update_batch_dataset(year)
+    #get_update_batch_dataset(year)
+    get_update_batch_dataset_by_week(week, year)
     update_df = clean_update_weekly_domestic_performance(data_path='', return_df=True)
     upload_df_to_table(project_id, dataset_id, table_id, update_df, mode="truncate")
 
@@ -120,12 +130,11 @@ default_args = {
     'is_paused_upon_creation': True
 }
 
-with DAG(dag_id = 'update_bigquery', default_args=default_args, schedule_interval='@weekly', catchup=False) as dag:
-    set_start_date = PythonOperator(task_id='set_start_date', python_callable=set_start_date_task)
+with DAG(dag_id = 'update_bigquery', default_args=default_args, schedule_interval="0 0 * * 1", catchup=True) as dag:
     etl_tmdb_movie = PythonOperator(task_id='etl_tmdb_movie', python_callable=etl_tmdb_movie_task)
     etl_tmdb_person = PythonOperator(task_id='etl_tmdb_person', python_callable=etl_tmdb_person_task)
     etl_video_stats = PythonOperator(task_id='etl_video_stats', python_callable=etl_video_stats_task)
     etl_tmdb_collection = PythonOperator(task_id='etl_tmdb_collection', python_callable=etl_tmdb_collection_task)
     etl_weekly_domestic_performance = PythonOperator(task_id='etl_weekly_domestic_performance', python_callable=etl_weekly_domestic_performance_task)
  
-    set_start_date >> etl_tmdb_movie >> [etl_tmdb_person, etl_video_stats, etl_tmdb_collection, etl_weekly_domestic_performance]
+    etl_tmdb_movie >> [etl_tmdb_person, etl_video_stats, etl_tmdb_collection, etl_weekly_domestic_performance]
