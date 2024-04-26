@@ -34,3 +34,6 @@ secrets/
 # Ignore raw_movie_details related ndjson 
 historical_data/raw_historical_data/tmdb/*.ndjson
 
+# Ignore update data
+historical_data/update_data/*
+
