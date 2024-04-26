@@ -13,7 +13,6 @@ from importlib import reload
 import concurrent.futures
 import json
 from datetime import date
-import shutil
 from datetime import datetime
 
 def get_initial_tmdb_people_id_bq() -> pd.Series: 
@@ -355,10 +354,6 @@ def get_tmdb_people_details(start_date: datetime, end_date: datetime):
         # upload_many_blobs_with_transfer_manager(bucket_name, filenames=filenames, source_directory=str_directory)
         for filename in filenames:
             upload_blob(bucket_name, os.path.join(str_directory, filename), filename)
-        
-        #remove directory after upload
-        if os.path.exists(folder_path):
-            shutil.rmtree(folder_path)
             
     except Exception as e:
         print(f"Error in uploading TMDB raw data to cloud storage \n Error details: {e}")

@@ -11,7 +11,6 @@ from googlecloud.read_data_gcs import read_blob, list_blobs
 from googlecloud.upload_initial_data_gcs import upload_many_blobs_with_transfer_manager, upload_blob
 from googleapiclient.discovery import build
 from airflow.exceptions import AirflowNotFoundException
-import shutil
 
 
 def get_video_keys_gcs(start_date: datetime, end_date: datetime) -> pd.DataFrame:
@@ -170,7 +169,3 @@ def extract_raw_video_stats(raw_file_dir: str, start_date: datetime, end_date: d
     filenames = list([file.name for file in Path(raw_file_dir).glob(f"raw_*_video_stats_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}.csv")])
     for filename in filenames:
         upload_blob("update_movies_tmdb", os.path.join(Path(raw_file_dir), filename), filename)
-
-    #remove directory after upload
-    if os.path.exists(raw_file_dir):
-        shutil.rmtree(raw_file_dir)

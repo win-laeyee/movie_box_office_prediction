@@ -80,7 +80,7 @@ def clean_raw_video_statistics(save_file_path: str, start_date: datetime = None,
 
     combined_df = video_details_df[["movie_id", "key", "site", "type", "published_at"]].set_index("key").join(video_statistics_df.set_index("video_key_id"), how="inner")
     combined_df.reset_index(drop=False, inplace=True)
-    combined_df.rename(columns={"key": "video_key_id", "site": "video_site", "type": "video_type"}, inplace=True)
+    combined_df.rename(columns={"key": "video_key_id", "index": "video_key_id", "site": "video_site", "type": "video_type"}, inplace=True)
     combined_df.fillna({"view_count": 0, "like_count": 0, "comment_count": 0}, inplace=True)
     combined_df = combined_df.astype({"view_count": int, "like_count": int, "comment_count": int})
     combined_df.drop_duplicates(inplace=True)
