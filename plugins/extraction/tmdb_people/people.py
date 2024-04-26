@@ -480,6 +480,9 @@ def clean_updated_people_details(people_details, save_file_path: str, return_df=
     if "gender" in filtered_df.columns:
         filtered_df = filtered_df.astype({"gender": pd.Int64Dtype()})
 
+    # Rename columns
+    filtered_df.rename(columns={"popularity": "tmdb_popularity", "known_for_department": "known_for"}, inplace=True)
+
     if not return_df:
         folder_path = save_file_path
         if not os.path.exists(folder_path):

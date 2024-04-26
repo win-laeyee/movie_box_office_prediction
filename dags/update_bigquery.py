@@ -22,7 +22,7 @@ def etl_tmdb_movie_task(**context):
     start_date = end_date - relativedelta(weeks=1)
 
     project_id = "is3107-418809"
-    dataset_id = "test_movie_dataset"
+    dataset_id = "movie_dataset"
     table_id = "movie"
     start_date = (start_date - relativedelta(months=3)).strftime('%Y-%m-%d')
     end_date = (end_date - relativedelta(months=3)).strftime('%Y-%m-%d')
@@ -36,7 +36,7 @@ def etl_tmdb_person_task(**context):
     start_date = end_date - relativedelta(weeks=1)
 
     project_id = "is3107-418809"
-    dataset_id = "test_movie_dataset"
+    dataset_id = "movie_dataset"
     table_id = "people"
     
     new_people_details, updated_people_details = get_tmdb_people_details(start_date, end_date)
@@ -70,7 +70,7 @@ def etl_video_stats_task(**context):
     end_date = end_date - relativedelta(months=3)
 
     project_id = "is3107-418809"
-    dataset_id = "test_movie_dataset"
+    dataset_id = "movie_dataset"
     table_id = "video_stats"    
     extract_raw_video_stats(os.path.abspath("./historical_data/update_data/video_stats"), start_date=start_date, end_date=end_date)
     df = clean_raw_video_statistics(save_file_path="", start_date=start_date, end_date=end_date, return_df=True, bucket_name="update_movies_tmdb")
@@ -89,7 +89,7 @@ def etl_tmdb_collection_task():
         c. Calls the `upload_df_to_table function` to upload the cleaned DataFrame to the specified BigQuery table, using the "append" mode.
     """
     project_id = "is3107-418809"
-    dataset_id = "test_movie_dataset"
+    dataset_id = "movie_dataset"
     table_id = "collection"
     collection_ids = collection_ids_to_update()
     if len(collection_ids) > 0:
@@ -112,7 +112,7 @@ def etl_weekly_domestic_performance_task(**context):
     start_date = end_date - relativedelta(weeks=1)
 
     project_id = "is3107-418809"
-    dataset_id = "test_movie_dataset"
+    dataset_id = "movie_dataset"
     table_id = "weekly_domestic_performance"
     week = start_date.isocalendar()[1]
     year = start_date.year
