@@ -16,7 +16,7 @@ def load_data_from_table(query, project_id="is3107-418809") -> pd.DataFrame:
         pandas.DataFrame: The loaded data as a pandas DataFrame.
     """
     script_dir = os.path.dirname(os.path.realpath(__file__))
-    json_path = os.path.join(script_dir, "is3107-418809-62c002a9f1f7.json")
+    json_path = os.path.join(script_dir, "is3107-418809-92db84ea97f6.json")
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
 
     client = bigquery.Client(project=project_id)

@@ -8,7 +8,7 @@ from googlecloud.read_data_gcs import read_blob, list_blobs
 from googleapiclient.discovery import build
 
 
-def get_raw_video_details_gcs(start_date: datetime, end_date: datetime) -> pd.DataFrame:
+def get_raw_video_details_gcs(start_date: datetime, end_date: datetime, bucket_name="movies_tmdb") -> pd.DataFrame:
     """
     Retrieves the raw video details from raw movie details data stored in Google Cloud Storage (GCS).
 
@@ -19,8 +19,9 @@ def get_raw_video_details_gcs(start_date: datetime, end_date: datetime) -> pd.Da
     Returns:
         pd.DataFrame: Pandas DataFrame containing the video keys and additional video details.
     """
-    bucket_name = "movies_tmdb"
     prefix = "raw_movie_details"
+    if "update" in bucket_name:
+        prefix = "update_" + prefix
     if start_date and end_date:
         prefix = prefix + f"_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}"
     filenames = list_blobs(bucket_name, prefix=prefix)
@@ -34,7 +35,7 @@ def get_raw_video_details_gcs(start_date: datetime, end_date: datetime) -> pd.Da
         df = pd.concat([df, file_content], axis=0)
     return df.drop_duplicates()
 
-def get_raw_video_statistics_gcs(start_date: datetime, end_date: datetime) -> pd.DataFrame:
+def get_raw_video_statistics_gcs(start_date: datetime, end_date: datetime, bucket_name="movies_tmdb") -> pd.DataFrame:
     """
     Retrieves the raw video statistics data stored in Google Cloud Storage (GCS).
 
@@ -45,7 +46,6 @@ def get_raw_video_statistics_gcs(start_date: datetime, end_date: datetime) -> pd
     Returns:
         pd.DataFrame: Pandas DataFrame containing the video keys and statistics.
     """
-    bucket_name = "movies_tmdb"
     sites = ["YouTube", "Vimeo"]
     df = pd.DataFrame()
     for site in sites:
@@ -62,7 +62,7 @@ def get_raw_video_statistics_gcs(start_date: datetime, end_date: datetime) -> pd
             df = pd.concat([df, file_content], axis=0)
     return df.drop_duplicates()
 
-def clean_raw_video_statistics(save_file_path: str, start_date: datetime = None, end_date: datetime = None, return_df=False):
+def clean_raw_video_statistics(save_file_path: str, start_date: datetime = None, end_date: datetime = None, return_df=False, bucket_name="movies_tmdb"):
     """
     Cleans the raw movie details and statistics from CSV files and saves the cleaned results to a CSV file.
 
@@ -73,14 +73,16 @@ def clean_raw_video_statistics(save_file_path: str, start_date: datetime = None,
         return_df (boolean, default False): If True, return dataframe. Else, save to `save_file_path`. 
 
     Returns:
-        filepath (str) or dataframe (pd.DataFrame)
+        filepath (str) or dataframe (pd.DataFrame) or None
     """
-    video_details_df = get_raw_video_details_gcs(start_date, end_date)
-    video_statistics_df = get_raw_video_statistics_gcs(start_date, end_date)
+    video_details_df = get_raw_video_details_gcs(start_date, end_date, bucket_name=bucket_name)
+    video_statistics_df = get_raw_video_statistics_gcs(start_date, end_date, bucket_name=bucket_name)
 
     combined_df = video_details_df[["movie_id", "key", "site", "type", "published_at"]].set_index("key").join(video_statistics_df.set_index("video_key_id"), how="inner")
-    combined_df.reset_index(drop=True, inplace=True)
-    combined_df.rename(columns={"site": "video_site", "type": "video_type"}, inplace=True)
+    combined_df.reset_index(drop=False, inplace=True)
+    combined_df.rename(columns={"key": "video_key_id", "site": "video_site", "type": "video_type"}, inplace=True)
+    combined_df.fillna({"view_count": 0, "like_count": 0, "comment_count": 0}, inplace=True)
+    combined_df = combined_df.astype({"view_count": int, "like_count": int, "comment_count": int})
     combined_df.drop_duplicates(inplace=True)
 
     if not return_df:
@@ -91,4 +93,3 @@ def clean_raw_video_statistics(save_file_path: str, start_date: datetime = None,
         return os.path.join(folder_path, "clean_video_stats.csv")
     else:
         return combined_df
-    

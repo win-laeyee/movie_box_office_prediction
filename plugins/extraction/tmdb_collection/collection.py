@@ -116,7 +116,7 @@ def upload_raw_initial_collection_tmdb_details_gcs():
     script_dir = os.path.dirname(os.path.realpath(__file__))
     plugins_dir = os.path.dirname(os.path.dirname(script_dir))
     interested_dir = os.path.join(plugins_dir, "/googlecloud")
-    json_path = os.path.join(interested_dir, "is3107-418809-62c002a9f1f7.json")
+    json_path = os.path.join(interested_dir, "is3107-418809-92db84ea97f6.json")
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
 
     bucket_name = "movies_tmdb"
@@ -224,7 +224,7 @@ def get_collection_tmdb_details(collection_ids):
     script_dir = os.path.dirname(os.path.realpath(__file__))
     plugins_dir = os.path.dirname(os.path.dirname(script_dir))
     interested_dir = os.path.join(plugins_dir, "/googlecloud")
-    json_path = os.path.join(interested_dir, "is3107-418809-62c002a9f1f7.json")
+    json_path = os.path.join(interested_dir, "is3107-418809-92db84ea97f6.json")
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
 
     file_path = os.path.join(os.path.dirname(plugins_dir), "historical_data") 

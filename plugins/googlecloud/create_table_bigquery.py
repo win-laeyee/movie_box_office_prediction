@@ -13,7 +13,7 @@ def create_dataset_if_not_exists(project_id, dataset_id):
         None
     """
     script_dir = os.path.dirname(os.path.realpath(__file__))
-    json_path = os.path.join(script_dir, "is3107-418809-62c002a9f1f7.json")
+    json_path = os.path.join(script_dir, "is3107-418809-92db84ea97f6.json")
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
 
     # Initialize BigQuery client
@@ -47,7 +47,7 @@ def create_table_if_not_exists(project_id, dataset_id, table_id, schema):
         None
     """
     script_dir = os.path.dirname(os.path.realpath(__file__))
-    json_path = os.path.join(script_dir, "is3107-418809-62c002a9f1f7.json")
+    json_path = os.path.join(script_dir, "is3107-418809-92db84ea97f6.json")
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
     
     client = bigquery.Client(project=project_id) # Initialize BigQuery client
@@ -90,7 +90,7 @@ def create_movie_table(project_id="is3107-418809", dataset_id="movie_dataset"):
         bigquery.SchemaField("tmdb_vote_count","INT64"),
         bigquery.SchemaField("tmdb_vote_average","FLOAT64"),
         bigquery.SchemaField("video_key_id","STRING", "REPEATED"),
-        bigquery.SchemaField("insertion_datetime","DATETIME")
+        bigquery.SchemaField("insertion_datetime","TIMESTAMP")
     ]
     create_table_if_not_exists(project_id, dataset_id, table_id, schema)
 
@@ -102,7 +102,7 @@ def create_collection_table(project_id="is3107-418809", dataset_id="movie_datase
         bigquery.SchemaField("name", "STRING"),
         bigquery.SchemaField("number_movies_before_2020", "INT64"),
         bigquery.SchemaField("avg_tmdb_popularity_before_2020", "FLOAT64"),
-        bigquery.SchemaField('insertion_datetime', "DATETIME")
+        bigquery.SchemaField('insertion_datetime', "TIMESTAMP")
     ]
     create_table_if_not_exists(project_id, dataset_id, table_id, schema)
 
@@ -117,7 +117,7 @@ def create_people_table(project_id="is3107-418809", dataset_id="movie_dataset"):
         bigquery.SchemaField("tmdb_popularity", "FLOAT64"),
         bigquery.SchemaField("total_number_cast_credits", "INT64"),
         bigquery.SchemaField("total_number_crew_credits", "INT64"),
-        bigquery.SchemaField('insertion_datetime', "DATETIME")
+        bigquery.SchemaField('insertion_datetime', "TIMESTAMP")
     ]
     create_table_if_not_exists(project_id, dataset_id, table_id, schema)
 
@@ -126,13 +126,14 @@ def create_video_stats_table(project_id="is3107-418809", dataset_id="movie_datas
     table_id = "video_stats"
     schema = [
         bigquery.SchemaField("movie_id", "INT64", mode="REQUIRED"),
+        bigquery.SchemaField("video_key_id", "STRING", mode="REQUIRED"),
         bigquery.SchemaField("video_site", "STRING"),
         bigquery.SchemaField("video_type", "STRING"),
+        bigquery.SchemaField("published_at", "STRING"),
         bigquery.SchemaField("view_count", "INT64"),
         bigquery.SchemaField("like_count", "INT64"),
-        bigquery.SchemaField("favourite_count", "INT64"),
         bigquery.SchemaField("comment_count", "INT64"),
-        bigquery.SchemaField('insertion_datetime', "DATETIME")
+        bigquery.SchemaField('insertion_datetime', "TIMESTAMP")
     ]
     create_table_if_not_exists(project_id, dataset_id, table_id, schema)
 
@@ -145,7 +146,7 @@ def create_weekly_domestic_performance_table(project_id="is3107-418809", dataset
         bigquery.SchemaField("rank", "INT64"),
         bigquery.SchemaField("domestic_gross", "INT64"),
         bigquery.SchemaField("domestic_theaters_count", "INT64"),
-        bigquery.SchemaField('insertion_datetime', "DATETIME")
+        bigquery.SchemaField('insertion_datetime', "TIMESTAMP")
     ]
     create_table_if_not_exists(project_id, dataset_id, table_id, schema)
 
@@ -179,7 +180,7 @@ def delete_all_tables(project_id="is3107-418809", dataset_id="movie_dataset"):
         None
     """
     script_dir = os.path.dirname(os.path.realpath(__file__))
-    json_path = os.path.join(script_dir, "is3107-418809-62c002a9f1f7.json")
+    json_path = os.path.join(script_dir, "is3107-418809-92db84ea97f6.json")
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
     client = bigquery.Client(project=project_id)  # Initialize BigQuery client
     try:
@@ -195,7 +196,7 @@ def delete_all_tables(project_id="is3107-418809", dataset_id="movie_dataset"):
 
 if __name__ == "__main__":
     project_id = "is3107-418809"
-    dataset_id = "movie_dataset"
-    delete_all_tables(project_id, dataset_id)
-    create_dataset_if_not_exists(project_id, dataset_id)
-    create_all_tables(project_id, dataset_id)
+    dataset_id = "test_movie_dataset"
+    # delete_all_tables(project_id, dataset_id)
+    # create_dataset_if_not_exists(project_id, dataset_id)
+    # create_all_tables(project_id, dataset_id)

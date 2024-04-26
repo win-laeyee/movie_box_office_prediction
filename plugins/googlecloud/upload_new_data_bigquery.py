@@ -1,8 +1,37 @@
 import os
 from google.cloud import bigquery
-from create_table_bigquery import create_table_if_not_exists
 from datetime import datetime, timedelta
 
+def create_table_if_not_exists(project_id, dataset_id, table_id, schema):
+    """
+    Creates the table in BigQuery if it does not already exist.
+
+    Args:
+        project_id (str): The ID of the Google Cloud project.
+        dataset_id (str): The ID of the dataset where the bigquery table will be created.
+        table_id (str): The ID of the table to be created.
+        schema (List[bigquery.SchemaField]): The schema of the table.
+
+    Returns:
+        None
+    """
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    json_path = os.path.join(script_dir, "is3107-418809-92db84ea97f6.json")
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
+    
+    client = bigquery.Client(project=project_id) # Initialize BigQuery client
+    table_ref = client.dataset(dataset_id).table(table_id) # Define table reference
+
+    try:
+        client.get_table(table_ref)    # Check if the table exists
+        print(f"Table {table_id} already exists. Skipping creation.")
+    except Exception as e:
+        table = bigquery.Table(table_ref, schema=schema) # Define table metadata
+        try:
+            client.create_table(table)  # API request - create table
+            print(f"Table {table_id} created successfully.")
+        except Exception as e:
+            print(f"Error creating table {table_id}: {e}")
 
 def upload_df_to_temp_table(project_id, dataset_id, table_id, schema, df, mode):
     """
@@ -19,7 +48,7 @@ def upload_df_to_temp_table(project_id, dataset_id, table_id, schema, df, mode):
         None
     """
     script_dir = os.path.dirname(os.path.realpath(__file__))
-    json_path = os.path.join(script_dir, "is3107-418809-62c002a9f1f7.json")
+    json_path = os.path.join(script_dir, "is3107-418809-92db84ea97f6.json")
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
     client = bigquery.Client(project=project_id)
     
@@ -54,14 +83,14 @@ def upsert_df_to_table(project_id, dataset_id, table_id, primary_key_columns, df
         table_id (str): ID of the BigQuery table.
         primary_key_columns (list of str): List of column names that form the primary key.
         df (pandas.DataFrame): Dictionary containing column names and their corresponding values for the new row.
-
+        
     Returns:
         None
     """
 
     # Initialize BigQuery client
     script_dir = os.path.dirname(os.path.realpath(__file__))
-    json_path = os.path.join(script_dir, "is3107-418809-62c002a9f1f7.json")
+    json_path = os.path.join(script_dir, "is3107-418809-92db84ea97f6.json")
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
     client = bigquery.Client(project=project_id)
     table_dest = f"{project_id}.{dataset_id}.{table_id}"
@@ -76,7 +105,7 @@ def upsert_df_to_table(project_id, dataset_id, table_id, primary_key_columns, df
     merge_sql = f"""
         MERGE `{table_dest}` AS target
         USING `{table_src}` AS source
-        ON {', '.join([f'target.{col} = source.{col}' for col in primary_key_columns])}        
+        ON {' AND '.join([f'target.{col} = source.{col}' for col in primary_key_columns])}        
         WHEN MATCHED THEN
             UPDATE SET {', '.join([f'target.{col} = source.{col}' for col in target_columns])}
         WHEN NOT MATCHED THEN
@@ -96,3 +125,54 @@ def upsert_df_to_table(project_id, dataset_id, table_id, primary_key_columns, df
     query_job = client.query(merge_sql)
     query_job.result()
     print("Upsert operation completed successfully.")
+
+def update_df_to_table(project_id, dataset_id, table_id, primary_key_columns, df, staging_dataset_id="staging_dataset"):
+    """
+    Merge a pandas Dataframe to the specified BigQuery table without inserting. Only updates if column value  of
+    source column is not null.
+
+    Args:
+        project_id (str): The ID of the Google Cloud project.
+        dataset_id (str): The ID of the BigQuery dataset.
+        table_id (str): ID of the BigQuery table.
+        primary_key_columns (list of str): List of column names that form the primary key.
+        df (pandas.DataFrame): Dictionary containing column names and their corresponding values for the new row.
+        
+    Returns:
+        None
+    """
+
+    # Initialize BigQuery client
+    script_dir = os.path.dirname(os.path.realpath(__file__))
+    json_path = os.path.join(script_dir, "is3107-418809-92db84ea97f6.json")
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
+    client = bigquery.Client(project=project_id)
+    table_dest = f"{project_id}.{dataset_id}.{table_id}"
+    table_src = f"{project_id}.{staging_dataset_id}.{table_id}"
+
+    # Add insertion datetime column to row
+    df["insertion_datetime"] = datetime.now()
+
+    # Construct SQL merge statement
+    source_columns = df.columns.tolist()
+    target_columns = list(filter(lambda i: i not in primary_key_columns, source_columns))
+    merge_sql = f"""
+        MERGE `{table_dest}` AS target
+        USING `{table_src}` AS source
+        ON {', '.join([f'target.{col} = source.{col}' for col in primary_key_columns])}        
+        WHEN MATCHED THEN
+            UPDATE SET {', '.join([f'target.{col} = CASE WHEN source.{col} IS NOT NULL THEN source.{col} ELSE target.{col} END' for col in target_columns])}
+    """
+    
+    # Get original table schema
+    original_table_ref = client.dataset(dataset_id).table(table_id)
+    original_table = client.get_table(original_table_ref)
+    original_table_schema = original_table.schema
+
+    # Populate temp table
+    upload_df_to_temp_table(project_id, staging_dataset_id, table_id, original_table_schema, df, mode="truncate")
+
+    # Execute SQL merge statement
+    query_job = client.query(merge_sql)
+    query_job.result()
+    print("Update operation completed successfully.")

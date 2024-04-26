@@ -19,7 +19,7 @@ def upload_df_to_table(project_id, dataset_id, table_id, df, mode):
     """
     
     script_dir = os.path.dirname(os.path.realpath(__file__))
-    json_path = os.path.join(script_dir, "is3107-418809-62c002a9f1f7.json")
+    json_path = os.path.join(script_dir, "is3107-418809-92db84ea97f6.json")
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
 
     client = bigquery.Client(project=project_id)
@@ -56,7 +56,7 @@ def upload_csv_to_table(project_id, dataset_id, table_id, csv_file_path, mode):
     """
     
     script_dir = os.path.dirname(os.path.realpath(__file__))
-    json_path = os.path.join(script_dir, "is3107-418809-62c002a9f1f7.json")
+    json_path = os.path.join(script_dir, "is3107-418809-92db84ea97f6.json")
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
 
     client = bigquery.Client(project=project_id)
@@ -74,6 +74,7 @@ def upload_csv_to_table(project_id, dataset_id, table_id, csv_file_path, mode):
         job_config.write_disposition = bigquery.WriteDisposition.WRITE_EMPTY  # Write only when tables empty - ensure no any overwrite
 
     df = pd.read_csv(csv_file_path)
+    print(df.dtypes)
     df['insertion_datetime'] = datetime.now() #create new column if not exist and save to same file
     df.to_csv(csv_file_path, index=False)
 
@@ -88,7 +89,7 @@ def upload_csv_to_table(project_id, dataset_id, table_id, csv_file_path, mode):
 
 def delete_all_data_from_table(project_id, dataset_id, table_id):
     script_dir = os.path.dirname(os.path.realpath(__file__))
-    json_path = os.path.join(script_dir, "is3107-418809-62c002a9f1f7.json")
+    json_path = os.path.join(script_dir, "is3107-418809-92db84ea97f6.json")
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = json_path
 
     # Initialize BigQuery client
