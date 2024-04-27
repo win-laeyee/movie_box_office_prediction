@@ -16,6 +16,9 @@ Access our final analytics product here: https://movie-box-office-dashboard-and-
 ### Prerequisites
 Before you begin, ensure you have Docker installed on your machine. If not, you can download it from Docker's official website.
 
+## Install packages
+`pip install -r requirements.txt`
+
 ### Environment Setup
 To avoid permission issues with Airflow, it's recommended to create a .env file with your user ID. Run the following command in your project's root directory:
 `echo -e "AIRFLOW_UID=$(id -u)" > .env`
